@@ -1,0 +1,57 @@
+.up-form-group {
+  border-radius: unset;
+  background-color: unset;
+  height: inherit;
+
+  .header {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+
+    &::-webkit-scrollbar {
+      display: inline-block;
+    }
+
+    .button-group-append {
+      margin-left: 10px;
+    }
+  }
+}
+
+::v-deep(.el-card__body) {
+  height: calc(100% - 77px);
+  overflow: auto;
+}
+
+::v-deep(.el-collapse) {
+  border-top: unset;
+  border-bottom-color: rgba($color: #000000, $alpha: 0);
+}
+
+::v-deep(.el-collapse-item + .el-collapse-item) {
+  margin-top: 10px;
+}
+
+::v-deep(.el-collapse-item) {
+  border-radius: 7px;
+  background-color: white;
+}
+
+::v-deep(.el-collapse-item__wrap) {
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  border-bottom: unset;
+}
+
+::v-deep(.el-collapse-item__header) {
+  border-radius: 7px;
+}
+
+::v-deep(.el-collapse-item__content) {
+  padding-bottom: 0px;
+}
+
+::v-deep(.el-tag) {
+  margin-left: 10px;
+  height: 30px;
+}
