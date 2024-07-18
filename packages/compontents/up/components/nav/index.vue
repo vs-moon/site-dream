@@ -2,7 +2,7 @@
   import { useConst, useEmits, useProps, useRunning } from '.'
   import { useAttrs } from 'vue'
 
-  import { UpAlive, UpCol, UpMore, UpRow } from '../index.js'
+  import { UpAlive, UpMenu, UpCol, UpMore, UpRow } from '../index.js'
 
   const name = 'UpNav'
 
@@ -25,6 +25,9 @@
   <UpRow class="up-nav">
     <UpCol icon="Guide" open>
       <UpAlive />
+    </UpCol>
+    <UpCol icon="Menu">
+      <UpMenu mode="horizontal" />
     </UpCol>
     <UpCol icon="Suitcase">
       <UpMore />

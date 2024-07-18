@@ -1,53 +1,49 @@
 <script setup>
-  import { useEmits, useProps, useRunning } from '.'
-  import { useAttrs } from 'vue'
+import { useEmits, useProps, useRunning } from '.'
+import { useAttrs } from 'vue'
 
-  const name = 'UpIcon'
+const name = 'UpIcon'
 
-  defineOptions({
-    name,
-    inheritAttrs: false
-  })
+defineOptions({
+  name,
+  inheritAttrs: false
+})
 
-  const attrs = useAttrs()
-  const slots = defineSlots()
-  const emits = defineEmits([ ...useEmits ])
-  const props = defineProps({ ...useProps })
-  const modelValue = defineModel()
+const attrs = useAttrs()
+const slots = defineSlots()
+const emits = defineEmits([ ...useEmits ])
+const props = defineProps({ ...useProps })
+const modelValue = defineModel()
 
-  const {  } = useRunning({ attrs, slots, emits, props, name })
+const {} = useRunning({ attrs, slots, emits, props, name })
 
-  defineExpose({})
+defineExpose({})
 </script>
 
 <template>
-  <ElSelect v-model="modelValue">
+  <ElSelect v-model="modelValue" filterable>
     <template #prefix>
-      <!--  color="teal" -->
-      <ElIcon size="18">
-        <component :is="modelValue" />
+      <ElIcon size="18" :color="color">
+        <component v-if="modelValue" :is="modelValue" />
       </ElIcon>
     </template>
-    <ElOptionGroup
-      v-for="(propValue, key) in options"
-      :key="key"
-      :label="key">
-      <ElOption
-        v-for="item in propValue"
-        :key="item.key"
-        :label="item.value"
-        :value="item.key">
-        <span style="float: left;">{{ item.key }}</span>
-        <span style="float: right; color: var(--el-text-color-secondary);">
-          <!-- {{ item.key }}&nbsp;&nbsp; -->
-          <ElIcon size="18">
-            <component :is="item.key"></component>
-          </ElIcon>
-        </span>
-      </ElOption>
-    </ElOptionGroup>
+    <ElOption
+      v-for="iconName in iconNames"
+      :key="iconName"
+      :label="iconName"
+      :value="iconName">
+      <span style="float: left;">{{ iconName }}</span>
+      <span style="float: right;">
+        <ElIcon size="18">
+          <component :is="iconName"></component>
+        </ElIcon>
+      </span>
+    </ElOption>
   </ElSelect>
 </template>
 
 <style lang="scss">
+.el-select {
+  min-width: 200px;
+}
 </style>

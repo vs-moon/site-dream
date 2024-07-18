@@ -1,4 +1,3 @@
-
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
@@ -6,6 +5,7 @@ import { ElMessageBox } from 'element-plus'
 import { VIEW_MODE, VALID_REVERSE, OPERATE_WAY } from '@vs-common/utils/const/enum.js'
 import { getRouteJumpProperty } from '@vs-common/utils/router/index.js'
 import { useMenuStore } from '@vs-common/utils/store/unit/menu.js'
+import { useScope } from '@vs-common/hook'
 
 export const useConst = {
   key: Symbol('UP_MANAGE_PAGE'),
@@ -15,14 +15,11 @@ export const useConst = {
 export const useEmits = [
   'remote:query',
   'remote:remove',
-  'remote:valid'
+  'remote:valid',
+  'remote:lazy'
 ]
 
 export const useProps = {
-  condition: {
-    type: Object,
-    default: {}
-  },
   remoteQuery: {
     type: Function,
     default: null
@@ -32,6 +29,10 @@ export const useProps = {
     default: null
   },
   remoteValid: {
+    type: Function,
+    default: null
+  },
+  remoteLazy: {
     type: Function,
     default: null
   },
@@ -49,17 +50,33 @@ export const useProps = {
       primary: 'id',
       valid: 'valid'
     }
+  },
+  rowKey: {
+    type: String,
+    default: 'id'
+  },
+  lazy: {
+    type: Boolean,
+    default: false
+  },
+  load: {
+    type: Function,
+    default: null
+  },
+  treeProps: {
+    children: 'children',
+    hasChildren: 'hasChildren'
   }
 }
-  
+
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
   const { nextRoute } = useMenuStore()
   
   const router = useRouter()
-
+  
   const outcome = ref([])
-
+  
   const status = reactive({
     drawer: false,
     loading: {
@@ -69,22 +86,24 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     },
     index: {
       valid: -1,
-      remove: -1,
+      remove: -1
     }
   })
   
-  watch(() => status.loading.valid, v => {
-    if (!v) {
-      status.index.valid = -1
-    }
+  useScope(() => {
+    watch(() => status.loading.valid, v => {
+      if (!v) {
+        status.index.valid = -1
+      }
+    })
+    
+    watch(() => status.loading.remove, v => {
+      if (!v) {
+        status.index.remove = -1
+      }
+    })
   })
   
-  watch(() => status.loading.remove, v => {
-    if (!v) {
-      status.index.remove = -1
-    }
-  })
-
   const pagination = reactive({
     pageNum: 1,
     pageSize: 10,
@@ -94,7 +113,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
   const onJump = async (viewMode, id = null) => {
     await router.push({ ...getRouteJumpProperty(nextRoute(), { id, viewMode }) })
   }
-
+  
   const onInsert = async () => {
     await onJump(VIEW_MODE.INSERT, null)
   }
@@ -141,7 +160,11 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
       pagination.pageSize = 10
     }
     
-    const { isFetching, then } = props.remoteQuery({ ...props.condition, ...pagination })
+    const { isFetching, then } = props.remoteQuery({
+      ...props.condition,
+      pageNum: pagination.pageNum,
+      pageSize: pagination.pageSize
+    })
     status.loading.outcome = isFetching
     then(response => {
       if (response.success) {
@@ -149,6 +172,14 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
         pagination.total = response.data.total
         emits('remote:query', outcome.value)
       }
+    })
+  }
+  
+  const onLoad = (row, treeNode, resolve) => {
+    const { then } = props.remoteLazy({ [props.rowKey]: row[props.rowKey] })
+    then(response => {
+      resolve(response.data)
+      emits('remote:lazy', response.data)
     })
   }
   
@@ -168,6 +199,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     onModify,
     onRemove,
     onValid,
+    onLoad,
     hasOperate
   }
 }

@@ -13,6 +13,9 @@ export * as DebounceUtils from './debounce/index.js'
 // Fetch
 export * from './fetch/index.js'
 export * as FetchUtils from './fetch/index.js'
+// Message
+export * from './message/index.js'
+export * as MessageUtils from './message/index.js'
 // 对象
 export * from './number/index.js'
 export * as NumberUtils from './number/index.js'

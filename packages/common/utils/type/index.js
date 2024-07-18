@@ -1,16 +1,14 @@
 import { isEmpty } from '../string/index.js'
-import { JS_TYPE, NAMING } from '../const/enum.js'
+import { JS_TYPE } from '../const/enum.js'
 
 /**
  * 类型
  * @param {*} v
- * @param {string} caseFormat
  * @returns {string}
  */
-export const JsType = (v, caseFormat = NAMING.UPPER) => {
+export const JsType = v => {
   const confineType = Reflect.toString.call(v)
-  const protoType = confineType.substring(8, confineType.length - 1)
-  return caseFormat === NAMING.UPPER ? protoType.toLocaleUpperCase() : protoType
+  return confineType.substring(8, confineType.length - 1)
 }
 
 /**
@@ -38,7 +36,7 @@ export const isFalsely = v => {
  * @returns {boolean}
  */
 export const isString = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.STRING : v instanceof String
+  return isTag ? JsType(v) === JS_TYPE.String : v instanceof String
 }
 
 /**
@@ -48,7 +46,7 @@ export const isString = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isNumber = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.NUMBER : v instanceof Number
+  return isTag ? JsType(v) === JS_TYPE.Number : v instanceof Number
 }
 
 /**
@@ -58,7 +56,7 @@ export const isNumber = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isBoolean = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.BOOLEAN : v instanceof Boolean
+  return isTag ? JsType(v) === JS_TYPE.Boolean : v instanceof Boolean
 }
 
 /**
@@ -68,7 +66,7 @@ export const isBoolean = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isNull = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.NULL : v === null
+  return isTag ? JsType(v) === JS_TYPE.Null : v === null
 }
 
 /**
@@ -78,7 +76,7 @@ export const isNull = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isUndefined = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.UNDEFINED : v === undefined
+  return isTag ? JsType(v) === JS_TYPE.Undefined : v === undefined
 }
 
 /**
@@ -88,7 +86,7 @@ export const isUndefined = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isSymbol = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.SYMBOL : v instanceof Symbol
+  return isTag ? JsType(v) === JS_TYPE.Symbol : v instanceof Symbol
 }
 
 /**
@@ -98,7 +96,7 @@ export const isSymbol = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isObject = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.OBJECT : v instanceof Object
+  return isTag ? JsType(v) === JS_TYPE.Object : v instanceof Object
 }
 
 /**
@@ -108,7 +106,7 @@ export const isObject = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isArray = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.ARRAY : v instanceof Array
+  return isTag ? JsType(v) === JS_TYPE.Array : v instanceof Array
 }
 
 /**
@@ -118,7 +116,7 @@ export const isArray = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isMap = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.MAP : v instanceof Map
+  return isTag ? JsType(v) === JS_TYPE.Map : v instanceof Map
 }
 
 /**
@@ -128,7 +126,7 @@ export const isMap = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isWeakMap = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.WEAK_MAP : v instanceof WeakMap
+  return isTag ? JsType(v) === JS_TYPE.WeakMap : v instanceof WeakMap
 }
 
 /**
@@ -138,7 +136,7 @@ export const isWeakMap = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isSet = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.SET : v instanceof Set
+  return isTag ? JsType(v) === JS_TYPE.Set : v instanceof Set
 }
 
 /**
@@ -148,7 +146,7 @@ export const isSet = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isWeakSet = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.WEAK_SET : v instanceof WeakSet
+  return isTag ? JsType(v) === JS_TYPE.WeakSet : v instanceof WeakSet
 }
 
 /**
@@ -158,7 +156,7 @@ export const isWeakSet = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isWeakRef = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.WEAK_REF : v instanceof WeakRef
+  return isTag ? JsType(v) === JS_TYPE.WeakRef : v instanceof WeakRef
 }
 
 /**
@@ -168,7 +166,7 @@ export const isWeakRef = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isFunction = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.FUNCTION : v instanceof Function
+  return isTag ? JsType(v) === JS_TYPE.Function : v instanceof Function
 }
 
 /**
@@ -177,7 +175,7 @@ export const isFunction = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isAsyncFunction = (v) => {
-  return JsType(v) === JS_TYPE.ASYNC_FUNCTION
+  return JsType(v) === JS_TYPE.AsyncFunction
 }
 
 /**
@@ -187,7 +185,7 @@ export const isAsyncFunction = (v) => {
  * @returns {boolean}
  */
 export const isPromise = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.PROMISE : v instanceof Promise
+  return isTag ? JsType(v) === JS_TYPE.Promise : v instanceof Promise
 }
 
 /**
@@ -197,7 +195,7 @@ export const isPromise = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isRegExp = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.REG_EXP : v instanceof RegExp
+  return isTag ? JsType(v) === JS_TYPE.RegExp : v instanceof RegExp
 }
 
 /**
@@ -207,5 +205,5 @@ export const isRegExp = (v, isTag = true) => {
  * @returns {boolean}
  */
 export const isDate = (v, isTag = true) => {
-  return isTag ? JsType(v) === JS_TYPE.DATE : v instanceof Date
+  return isTag ? JsType(v) === JS_TYPE.Date : v instanceof Date
 }

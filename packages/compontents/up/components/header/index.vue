@@ -23,14 +23,16 @@
 
 <template>
   <ElHeader>
-    <ElRow :gutter="10">
-      <ElCol :span="20">
-        <UpNav />
-      </ElCol>
-      <ElCol :span="4">
-        <UpTools />
-      </ElCol>
-    </ElRow>
+    <slot>
+      <ElRow :gutter="10">
+        <ElCol :span="20">
+          <UpNav />
+        </ElCol>
+        <ElCol :span="4">
+          <UpTools />
+        </ElCol>
+      </ElRow>
+    </slot>
   </ElHeader>
 </template>
 

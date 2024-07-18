@@ -1,8 +1,8 @@
 <script setup>
-import { useEmits, useProps, useRunning } from '.'
+import { useConst, useProps, useEmits, useRunning } from '.'
 import { useAttrs } from 'vue'
 
-const name = 'Console'
+const name = 'UpCrossDomainInject'
 
 defineOptions({
   name,
@@ -14,17 +14,16 @@ const slots = defineSlots()
 const emits = defineEmits([ ...useEmits ])
 const props = defineProps({ ...useProps })
 
-const {} = useRunning({ attrs, slots, emits, props, name })
-
-
-defineExpose({})
+const {
+  iframeRef
+} = useRunning({ attrs, slots, emits, props, name })
 </script>
 
 <template>
-  <section>
-
-  </section>
+  <slot></slot>
+  <iframe :src="src" :ref="iframeRef" style="display: none" />
 </template>
 
-<style lang="scss" scoped>
+<style scoped>
+
 </style>

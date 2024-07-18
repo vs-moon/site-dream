@@ -1,34 +1,26 @@
 /**
- * 命名格式
- */
-export const NAMING = {
-  UPPER: 'UPPER',
-  LOWER: 'LOWER'
-}
-
-/**
  * JS 类型
  */
 export const JS_TYPE = {
-  STRING: 'STRING',
-  NUMBER: 'NUMBER',
-  FLOAT: 'FLOAT',
-  BOOLEAN: 'BOOLEAN',
-  NULL: 'NULL',
-  UNDEFINED: 'UNDEFINED',
-  SYMBOL: 'SYMBOL',
-  OBJECT: 'OBJECT',
-  ARRAY: 'ARRAY',
-  MAP: 'MAP',
-  WEAK_MAP: 'WEAK_MAP',
-  SET: 'SET',
-  WEAK_SET: 'WEAK_SET',
-  WEAK_REF: 'WEAK_REF',
-  FUNCTION: 'FUNCTION',
-  ASYNC_FUNCTION: 'ASYNC_FUNCTION',
-  PROMISE: 'PROMISE',
-  REG_EXP: 'REG_EXP',
-  DATE: 'DATE'
+  String: 'String',
+  Number: 'Number',
+  Float: 'Float',
+  Boolean: 'Boolean',
+  Null: 'Null',
+  Undefined: 'Undefined',
+  Symbol: 'Symbol',
+  Object: 'Object',
+  Array: 'Array',
+  Map: 'Map',
+  WeakMap: 'WeakMap',
+  Set: 'Set',
+  WeakSet: 'WeakSet',
+  WeakRef: 'WeakRef',
+  Function: 'Function',
+  AsyncFunction: 'AsyncFunction',
+  Promise: 'Promise',
+  RegExp: 'RegExp',
+  Date: 'Date'
 }
 
 /**
@@ -119,4 +111,23 @@ export const VIEW_MODE_MAP = {
   [VIEW_MODE.MODIFY]: '修改',
   [VIEW_MODE.DETAILS]: '详情',
   [VIEW_MODE.QUERY]: '查询',
+}
+
+export const RESPONSE_STATUS = {
+  SUCCESS: {
+    code: 200,
+    message: 'OK'
+  },
+  FAIL: {
+    code: 500,
+    message: 'ERROR'
+  },
+  DOMAIN_SITE_UNAUTHORIZED: {
+    code: 10001,
+    message: '域名站点未授权'
+  },
+  DOMAIN_ACCOUNT_UNAUTHORIZED: {
+    code: 10002,
+    message: '域名账户未认证'
+  }
 }

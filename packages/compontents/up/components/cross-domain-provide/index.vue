@@ -1,8 +1,8 @@
 <script setup>
-import { useEmits, useProps, useRunning } from '.'
+import { useConst, useProps, useEmits, useRunning } from '.'
 import { useAttrs } from 'vue'
 
-const name = 'Console'
+const name = 'UpCrossDomainProvide'
 
 defineOptions({
   name,
@@ -15,16 +15,12 @@ const emits = defineEmits([ ...useEmits ])
 const props = defineProps({ ...useProps })
 
 const {} = useRunning({ attrs, slots, emits, props, name })
-
-
-defineExpose({})
 </script>
 
 <template>
-  <section>
 
-  </section>
 </template>
 
-<style lang="scss" scoped>
+<style scoped>
+
 </style>

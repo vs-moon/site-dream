@@ -263,16 +263,6 @@ export default {
         }
       }
       
-      const canJumpRouteAction = menuStore.source.find(item => item[aliveProperty.routeAction] === VALID.T)
-      
-      // TODO [存在可跳转默认页面](重定向至默认页面)
-      if (canJumpRouteAction) {
-        aliveStore.update(canJumpRouteAction)
-        return {
-          ...toRaw(canJumpRouteAction[aliveProperty.routeJump])
-        }
-      }
-      
       return candidateRoute
     }
     
@@ -282,19 +272,11 @@ export default {
       if (to.path === finalRouteConst.entrance.path) {
         // TODO [如果已认证](拦截登录页面跳转, 重定向至访问中页面或根页面, 只有登出成功后才可访问)
         if (authorizationStore.enable) {
-          // TODO [存在访问中页面]
-          if (aliveStore.active) {
-            return {
-              ...toRaw(aliveStore.current[aliveProperty.routeJump])
-            }
-          } else {
-            return finalRouteConst.root.path
-          }
+          return defaultRouteJump(finalRouteConst.root.path)
         }
       } else {
         // TODO [如果已认证]
         if (authorizationStore.enable) {
-          
           // TODO 如果跳转目标为根页面
           if (to.path === finalRouteConst.root.path) {
             return defaultRouteJump()

@@ -38,6 +38,6 @@ const {} = useRunning({ attrs, slots, emits, props, name })
 
 <style scoped lang="scss">
 .el-select {
-  min-width: 100px;
+  min-width: 200px;
 }
 </style>

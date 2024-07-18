@@ -13,9 +13,10 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
   const condition = reactive({
     source: '',
-    type: '',
-    code: '',
-    name: ''
+    menuName: '',
+    routeName: '',
+    routePath: '',
+    parentId: 0
   })
   
   return {

@@ -1,9 +1,9 @@
 <script setup>
 import { useEmits, useProps, useRunning } from '.'
-import { useAttrs } from 'vue'
+import { useAttrs, KeepAlive, computed } from 'vue'
 
-import { useAliveStore } from '@vs-common/utils/store/unit/alive.js'
-import { UpHeader, UpMenu } from '@vs-component/up'
+import { useAliveStore } from '@vs-common/utils'
+import { UpHeader, UpAside, UpMenu } from '@vs-component/up'
 
 const name = 'Box'
 
@@ -20,7 +20,8 @@ const props = defineProps({ ...useProps })
 const {} = useRunning({ attrs, slots, emits, props, name })
 
 const aliveStore = useAliveStore()
-
+// const aliveNames = computed(() => aliveStore.aliveNames.join(','))
+// const aliveEx = computed(() => aliveNames.value ? '' : 'console')
 
 defineExpose({})
 </script>
@@ -28,18 +29,16 @@ defineExpose({})
 <template>
   <section class="box">
     <ElContainer>
-      <ElAside>
+      <UpAside app-name="账号中心">
         <UpMenu />
-      </ElAside>
+      </UpAside>
       <ElContainer>
         <UpHeader />
         <ElMain>
           <RouterView v-slot="{ Component, route }">
-            <Transition>
-              <KeepAlive :max="aliveStore.max" :include="aliveStore.aliveNames">
-                <component :is="Component" />
-              </KeepAlive>
-            </Transition>
+            <KeepAlive :max="aliveStore.max" :include="aliveStore.aliveNames">
+              <component :is="Component" :key="route.path" />
+            </KeepAlive>
           </RouterView>
         </ElMain>
         <ElFooter>

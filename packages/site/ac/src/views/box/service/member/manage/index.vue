@@ -1,8 +1,8 @@
 <script setup>
 import { useConst, useEmits, useProps, useRunning } from '.'
 import { useAttrs } from 'vue'
-
 import { UpManagePage } from '@vs-component/up'
+import { selectPage, validOne, deleteOne } from '@/api/sso/member.js'
 
 const name = 'serviceMemberManage'
 
@@ -18,9 +18,6 @@ const props = defineProps({ ...useProps })
 
 const {
   condition,
-  selectPage,
-  validOne,
-  deleteOne
 } = useRunning({ attrs, slots, emits, props, name })
 
 defineExpose({})
@@ -38,11 +35,9 @@ defineExpose({})
         <ElTableColumn prop="username" label="用户名" width="150" />
       </template>
       <template #condition>
-        <ElForm :model="condition" @submit.prevent label-width="auto">
-          <ElFormItem label="用户名">
-            <ElInput v-model="condition.username" />
-          </ElFormItem>
-        </ElForm>
+        <ElFormItem label="用户名">
+          <ElInput v-model="condition.username" />
+        </ElFormItem>
       </template>
     </UpManagePage>
   </section>

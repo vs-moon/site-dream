@@ -11,8 +11,7 @@ import { useProperty } from '../property.js'
 
 const modules = import.meta.glob('@/views/**/*.vue')
 
-export const useMenuStore = defineStore(IDS.menu
-  , () => {
+export const useMenuStore = defineStore(IDS.menu, () => {
   
   const remote = useRemote()
   const router = useRouter()

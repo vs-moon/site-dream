@@ -1,4 +1,4 @@
-import { ref, toRefs } from 'vue'
+import { ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
@@ -9,13 +9,13 @@ import { IDS, REMOTE } from '../const.js'
 
 export const useAuthorizationStore = defineStore(IDS.authorization, () => {
   
-  
   const remote = useRemote()
   const router = useRouter()
   const menuStore = useMenuStore()
   
   // 👉 State
   const enable = ref(false)
+  const cross = ref([])
   const routine = ref('')
   const remember = ref(false)
   const hibernation = ref('')
@@ -65,9 +65,9 @@ export const useAuthorizationStore = defineStore(IDS.authorization, () => {
       }
     })
   }
-  
   return {
     enable,
+    cross,
     routine,
     remember,
     hibernation,

@@ -1,4 +1,6 @@
 export const DIC = {
   VALID: 'VALID',
-  SOURCE: 'SOURCE'
+  SOURCE: 'SOURCE',
+  JUMP_MODE: 'JUMP_MODE',
+  MENU_MODE: 'MENU_MODE'
 }

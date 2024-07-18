@@ -34,7 +34,7 @@
         <ElButton type="success" :disabled="viewMode === VIEW_MODE.QUERY || viewMode === VIEW_MODE.DETAILS" @click="onInsert">保存</ElButton>
       </template>
       <template #default>
-        <ElForm :model="modelValue" :disabled="viewMode === VIEW_MODE.QUERY || viewMode === VIEW_MODE.DETAILS" inline>
+        <ElForm :model="modelValue" :disabled="viewMode === VIEW_MODE.QUERY || viewMode === VIEW_MODE.DETAILS" :inline="inline">
           <slot></slot>
         </ElForm>
       </template>
@@ -49,6 +49,11 @@
 
     .el-card {
       height: 100%;
+
+      ::v-deep(.el-card__body) {
+        height: calc(100% - 77px);
+        overflow: auto;
+      }
     }
   }
 </style>

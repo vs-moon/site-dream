@@ -21,11 +21,12 @@
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "sass": "^1.72.0",
-    "vue": "^3.4.21",
+    "vue": "^3.4.32",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.2.7"
+    "vite": "^5.2.7",
+    "vite-plugin-vue-devtools": "^7.3.6"
   }
 }

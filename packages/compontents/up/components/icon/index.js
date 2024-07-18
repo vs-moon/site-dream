@@ -6,9 +6,13 @@ export const useConst = {
 export const useEmits = []
 
 export const useProps = {
-  options: {
-    type: Object,
-    default: {}
+  color: {
+    type: String,
+    default: 'teal'
+  },
+  iconNames: {
+    type: Array,
+    default: []
   }
 }
 

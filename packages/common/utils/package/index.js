@@ -176,21 +176,21 @@ export const removeEmptyProp = (o, recurrence = true) => {
       const v = o[property]
       const vt = JsType(v)
       switch (vt) {
-        case JS_TYPE.NULL:
-        case JS_TYPE.UNDEFINED:
+        case JS_TYPE.Null:
+        case JS_TYPE.Undefined:
           Reflect.deleteProperty(o, property)
           break
-        case JS_TYPE.STRING:
+        case JS_TYPE.String:
           isEmptyString(v) && Reflect.deleteProperty(o, property)
           break
-        case JS_TYPE.OBJECT:
+        case JS_TYPE.Object:
           if (isEmptyObject(v)) {
             Reflect.deleteProperty(o, property)
           } else {
             recurrence && removeEmptyProp(v)
           }
           break
-        case JS_TYPE.ARRAY:
+        case JS_TYPE.Array:
           if (isEmptyArray(v)) {
             Reflect.deleteProperty(o, property)
           } else {
@@ -202,4 +202,16 @@ export const removeEmptyProp = (o, recurrence = true) => {
       }
     })
   }
+}
+
+/**
+ * Rest参数追加
+ * @param primitiveArgs
+ * @param targetArgs
+ * @returns {any}
+ */
+export const restArgsAppend = (primitiveArgs, ...targetArgs) => {
+  const argsCopy = JSON.parse(JSON.stringify(primitiveArgs))
+  argsCopy.push(...targetArgs)
+  return argsCopy
 }

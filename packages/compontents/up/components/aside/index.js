@@ -1,5 +1,7 @@
+import { provide, reactive } from 'vue'
+
 export const useConst = {
-  key: Symbol('UP_MENU'),
+  key: Symbol('UP_ASIDE'),
   enum: {}
 }
 
@@ -10,16 +12,21 @@ export const useProps = {
     type: String,
     default: '/favicon.ico'
   },
-  mode: {
+  appName: {
     type: String,
-    default: 'vertical'
-  },
-  collapse: {
-    type: Boolean,
-    default: undefined
+    default: 'Vue'
   }
 }
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
-  return {}
+  
+  const status = reactive({
+    collapse: false
+  })
+  
+  provide(useConst.key, status)
+  
+  return {
+    status
+  }
 }

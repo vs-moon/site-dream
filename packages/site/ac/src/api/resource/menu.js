@@ -12,6 +12,10 @@ export const selectMany = params => {
     return useRequest.post({ url: '/menu/selectMany', params })
 }
 
+export const selectLazy = params => {
+    return useRequest.post({ url: '/menu/selectLazy', params })
+}
+
 export const insertOne = params => {
     return useRequest.post({ url: '/menu/insertOne', params })
 }

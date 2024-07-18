@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { hasInjectionContext, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { VALID } from '../../const/enum.js'
 import { IDS } from '../const.js'
@@ -24,150 +24,120 @@ export const useAliveStore = defineStore(IDS.alive, () => {
   const aliveMapping = ref({})
   
   // 👉 Other
-  /**
-   * 获取最久远的缓存项
-   * @returns {*}
-   */
-  const getAliveRemote = () => {
+  const confineReplace = newAlive => {
     const minStamp = Math.min(...Object.values(aliveStamps.value))
-    for (let aliveKey in aliveStamps.value) {
-      if (aliveStamps.value[aliveKey] === minStamp) {
-        return aliveMapping.value[aliveKey]
+    
+    const newAliveKey = newAlive[aliveProperty.id]
+    const newAliveName = newAlive[aliveProperty.routeName]
+    
+    for (let remoteAliveKey in aliveStamps.value) {
+      if (aliveStamps.value[remoteAliveKey] === minStamp) {
+        
+        const remoteAliveName = aliveMapping.value[remoteAliveKey][aliveProperty.routeName]
+        
+        active.value = newAliveKey
+        current.value = newAlive
+        
+        Reflect.deleteProperty(aliveStamps.value, remoteAliveKey)
+        Reflect.set(aliveStamps.value, newAliveKey, new Date().getTime())
+        
+        Reflect.deleteProperty(aliveMapping.value, remoteAliveKey)
+        Reflect.set(aliveMapping.value, newAliveKey, newAlive)
+        
+        aliveNames.value.splice(aliveNames.value.indexOf(remoteAliveName), 1, newAliveName)
+        
+        const navIndex = navs.value.findIndex(nav => (nav[aliveProperty.id] === newAliveKey))
+        if (navIndex < 0) {
+          navs.value.push(newAlive)
+        } else {
+          navs.value.splice(navIndex, 1, newAlive)
+        }
       }
-    }
-  }
-  
-  const hasNav = aliveKey => navs.value.find(nav => nav[aliveProperty.id] === aliveKey)
-  const hasAliveNames = routeName => aliveNames.value.indexOf(routeName) > -1
-  
-  /**
-   * 更新常规的当前缓存键、当前缓存项
-   * @param aliveKey
-   * @param alive
-   */
-  const updateCommonSeries = (aliveKey, alive) => {
-    active.value = aliveKey
-    current.value = alive
-  }
-  
-  /**
-   * 更新缓存项映射、缓存项时间戳
-   * @param aliveKey
-   * @param alive
-   */
-  const updateCacheSeries = (aliveKey, alive) => {
-    aliveStamps.value[aliveKey] = new Date().getTime()
-    aliveMapping.value[aliveKey] = alive
-  }
-  
-  const getNavIndex = aliveKey => {
-    return navs.value.findIndex(nav => (nav[aliveProperty.id] === aliveKey))
-  }
-  
-  const removeNav = (aliveKey, alive) => {
-    const oldNavIndex = getNavIndex(aliveKey)
-    if (oldNavIndex > -1) {
-      navs.value.splice(oldNavIndex, 1)
-    }
-  }
-  
-  const replaceNav = (aliveKey, alive) => {
-    const oldNavIndex = getNavIndex(aliveKey)
-    if (oldNavIndex > -1) {
-      navs.value.splice(oldNavIndex, 1)
-      navs.value.splice(oldNavIndex, 0, alive)
-    }
-  }
-  
-  const removeAliveName = (routeName) => {
-    const oldAliveNameIndex = aliveNames.value.indexOf(routeName)
-    if (oldAliveNameIndex > -1) {
-      aliveNames.value.splice(oldAliveNameIndex, 1)
     }
   }
   
   const update = (alive, { isJump = false } = {}) => {
     
-    if (alive) {
-      
-      const aliveKey = alive[aliveProperty.id]
-      const aliveName = alive[aliveProperty.routeName]
-      const routeAlive = alive[aliveProperty.routeAlive]
-      
-      if (aliveKey === active.value) {
-        
-        if (routeAlive === VALID.T) {
-          updateCacheSeries(aliveKey, alive)
-        }
-        
-        updateCommonSeries(aliveKey, alive)
-        replaceNav(aliveKey, alive)
-        
-      } else {
-        
-        if (aliveNames.value.length >= max.value) {
-          remove(getAliveRemote(), { isRemoveNav: true })
+    const aliveKey = alive[aliveProperty.id]
+    const aliveName = alive[aliveProperty.routeName]
+    const routeAlive = alive[aliveProperty.routeAlive]
+    
+    if (isJump) {
+      router.value.push(alive[aliveProperty.routeJump])
+    } else {
+      let isUnReset = true
+      if (VALID.T === routeAlive) {
+        if (aliveNames.value.length >= max.value && aliveNames.value.indexOf(aliveName) < 0) {
+          confineReplace(alive)
+          isUnReset = false
         } else {
-          if (routeAlive === VALID.T) {
-            updateCacheSeries(aliveKey, alive)
-            if (!hasAliveNames(aliveName)) {
-              aliveNames.value.push(aliveName)
-            }
-          }
+          Reflect.set(aliveStamps.value, aliveKey, new Date().getTime())
+          Reflect.set(aliveMapping.value, aliveKey, alive)
           
-          updateCommonSeries(aliveKey, alive)
-          if (!hasNav(aliveKey)) {
-            navs.value.push(alive)
+          if (aliveNames.value.indexOf(aliveName) < 0) {
+            aliveNames.value.push(aliveName)
           }
         }
       }
       
-      if (isJump) {
-        router.value.push(alive[aliveProperty.routeJump])
+      if (isUnReset) {
+        active.value = aliveKey
+        current.value = alive
+        const navIndex = navs.value.findIndex(nav => (nav[aliveProperty.id] === aliveKey))
+        if (navIndex < 0) {
+          navs.value.push(alive)
+        } else {
+          navs.value.splice(navIndex, 1, alive)
+        }
       }
     }
   }
   
-  const remove = (alive, { isJump = false, isRemoveNav = false } = {}) => {
-    
+  const remove = alive => {
     if (alive) {
-      
       let nextAlive
       const aliveKey = alive[aliveProperty.id]
-      const routeName = alive[aliveProperty.routeName]
+      const aliveName = alive[aliveProperty.routeName]
       
       Reflect.deleteProperty(aliveStamps.value, aliveKey)
       Reflect.deleteProperty(aliveMapping.value, aliveKey)
-      removeAliveName(routeName)
+      
+      aliveNames.value.findIndex((name, index) => {
+        if (name === aliveName) {
+          aliveNames.value.splice(index, 1)
+          return true
+        }
+      })
       
       if (active.value === aliveKey) {
-        for (const index in navs.value) {
-          if (navs.value[index][aliveProperty.id] === aliveKey) {
-            
+        navs.value.findIndex((nav, index) => {
+          if (nav[aliveProperty.id] === aliveKey) {
             nextAlive = navs.value[index + 1] || navs.value[index - 1]
             
             if (nextAlive) {
-              const nextAliveKey = nextAlive[aliveProperty.id]
-              updateCommonSeries(nextAliveKey, nextAlive)
+              active.value = nextAlive[aliveProperty.id]
+              current.value = nextAlive
             } else {
-              updateCommonSeries('', {})
+              active.value = ''
+              current.value = {}
             }
             
-            break
+            return true
           }
-        }
+        })
       }
       
-      if (isRemoveNav) {
-        removeNav(aliveKey)
-      }
-      
-      if (isJump) {
-        if (nextAlive) {
-          router.value.push(nextAlive[aliveProperty.routeJump])
-        } else if (isBlank(active.value)) {
-          router.value.push(ROUTE_CONST.root.path)
+      navs.value.findIndex((nav, index) => {
+        if (nav[aliveProperty.id] === aliveKey) {
+          navs.value.splice(index, 1)
+          return true
         }
+      })
+      
+      if (nextAlive) {
+        router.value.push(nextAlive[aliveProperty.routeJump])
+      } else if (isBlank(active.value)) {
+        router.value.push(ROUTE_CONST.root.path)
       }
     }
   }

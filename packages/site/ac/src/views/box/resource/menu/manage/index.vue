@@ -1,7 +1,7 @@
 <script setup>
 import { useConst, useEmits, useProps, useRunning } from '.'
 import { useAttrs } from 'vue'
-import { selectPage, validOne, deleteOne } from '@/api/resource/menu.js'
+import { selectPage, selectLazy, validOne, deleteOne } from '@/api/resource/menu.js'
 import { UpManagePage } from '@vs-component/up'
 
 const name = 'resourceMenuManage'
@@ -27,31 +27,31 @@ defineExpose({})
 <template>
   <section class="resource-menu-manage">
     <UpManagePage
-        :condition="condition"
+        v-model:condition="condition"
         :remote-query="selectPage"
         :remote-valid="validOne"
-        :remote-remove="deleteOne">
+        :remote-remove="deleteOne"
+        :remote-lazy="selectLazy"
+        lazy>
       <template #default>
         <ElTableColumn prop="source" label="数据来源" width="150" />
-        <ElTableColumn prop="type" label="类型" width="200" />
-        <ElTableColumn prop="code" label="编码" width="200" />
-        <ElTableColumn prop="name" label="名称" width="200" />
+        <ElTableColumn prop="menuName" label="菜单名称" width="200" />
+        <ElTableColumn prop="routeName" label="路由名称" width="200" />
+        <ElTableColumn prop="routePath" label="路由路径" width="200" />
       </template>
       <template #condition>
-        <ElForm :model="condition" @submit.prevent label-width="auto">
-          <ElFormItem label="数据来源">
-            <ElInput v-model="condition.source" />
-          </ElFormItem>
-          <ElFormItem label="类型">
-            <ElInput v-model="condition.type" />
-          </ElFormItem>
-          <ElFormItem label="编码">
-            <ElInput v-model="condition.code" />
-          </ElFormItem>
-          <ElFormItem label="名称">
-            <ElInput v-model="condition.name" />
-          </ElFormItem>
-        </ElForm>
+        <ElFormItem label="数据来源">
+          <ElInput v-model="condition.source" />
+        </ElFormItem>
+        <ElFormItem label="菜单名称">
+          <ElInput v-model="condition.menuName" />
+        </ElFormItem>
+        <ElFormItem label="路由名称">
+          <ElInput v-model="condition.routeName" />
+        </ElFormItem>
+        <ElFormItem label="路由路径">
+          <ElInput v-model="condition.routePath" />
+        </ElFormItem>
       </template>
     </UpManagePage>
   </section>

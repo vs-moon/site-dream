@@ -1,4 +1,4 @@
-import { isReactive, isRef, unref, watch } from 'vue'
+import { isReactive, isRef, toRaw, unref, watch } from 'vue'
 import { createFetch } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
 
@@ -10,12 +10,15 @@ import { useRouter, ROUTE_CONST } from '../router/index.js'
 
 const router = useRouter()
 
+// 鉴权头
 export const AUTHORIZATION_HEAD = {
   AUTHORIZATION: 'Authorization',
+  AUTHORIZATION_CROSS: 'Authorization-Cross',
   AUTHORIZATION_HIBERNATION: 'Authorization-Hibernation',
   AUTHORIZATION_REMEMBER: 'Authorization-Remember'
 }
 
+// 请求方式
 export const REQUEST_METHOD = {
   GET: 'get',
   POST: 'post',
@@ -26,8 +29,10 @@ export const REQUEST_METHOD = {
   HEAD: 'head'
 }
 
+// 请求方式 values
 export const REQUEST_METHOD_VALUES = Object.values(REQUEST_METHOD)
 
+// 响应类型
 export const RESPONSE_TYPE = {
   JSON: 'json',
   TEXT: 'text',
@@ -36,8 +41,10 @@ export const RESPONSE_TYPE = {
   FORM_DATA: 'formData'
 }
 
+// 响应类型 values
 export const RESPONSE_TYPE_VALUES = Object.values(RESPONSE_TYPE)
 
+// 第三方 useFetch 参数选项
 class UseFetchOptions {
   constructor({
                 fetch,
@@ -59,6 +66,7 @@ class UseFetchOptions {
   }
 }
 
+// 第三方 useFetch 配置
 class FetchConfig {
   baseUrl
   combination
@@ -69,22 +77,34 @@ class FetchConfig {
     this.baseUrl = baseUrl
     this.combination = combination
     this.options = Reflect.construct(UseFetchOptions, [ options ])
+    // fetch 原生选项
     this.fetchOptions = Reflect.construct(Request, [ '', { ...fetchOptions } ])
   }
 }
 
+// 自定义 Fetch 类
 export class VSFetch {
   authorization
   config
   useFetch
   
-  constructor({ baseUrl, combination, options, fetchOptions, authorization = true } = {}) {
+  constructor({
+    baseUrl,
+    combination,
+    options,
+    fetchOptions,
+    authorization = true
+  }) {
     
     this.authorization = authorization
     
-    this.config = Reflect.construct(FetchConfig, [
-      { baseUrl, combination, options, fetchOptions }
-    ])
+    this.config = Reflect.construct(FetchConfig,
+      [{
+        baseUrl,
+        combination,
+        options,
+        fetchOptions
+      }])
     
     this.config.options.beforeFetch = ctx => this.onRequestBefore.call(this, ctx)
     this.config.options.afterFetch = ctx => this.onResponseAfter.call(this, ctx)
@@ -94,7 +114,7 @@ export class VSFetch {
   }
   
   onNotification(data) {
-    const { success, message } = data.value
+    const { success, message } = toRaw(data)
     ElNotification({
       title: success ? 'Success' : 'Fail',
       type: success ? 'success' : 'error',
@@ -125,18 +145,18 @@ export class VSFetch {
       
       const authorizationStore = useAuthorizationStore()
       
-      const roution = authorizationStore.routine
+      const routine = authorizationStore.routine
       const hibernation = authorizationStore.hibernation
       const remember = authorizationStore.remember
-      
-      if (roution) {
-        options.headers[AUTHORIZATION_HEAD.AUTHORIZATION] = roution
+
+      if (routine) {
+        options.headers[AUTHORIZATION_HEAD.AUTHORIZATION] = routine
       }
       
       if (hibernation) {
         options.headers[AUTHORIZATION_HEAD.AUTHORIZATION_HIBERNATION] = hibernation
       }
-      
+
       if (remember) {
         options.headers[AUTHORIZATION_HEAD.AUTHORIZATION_REMEMBER] = remember
       }
@@ -153,16 +173,21 @@ export class VSFetch {
       
       const { code } = data
       
-      const roution = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION)
+      const routine = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION)
+      const cross = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION_CROSS)
       const hibernation = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION_HIBERNATION)
       
       const authorizationStore = useAuthorizationStore()
       
-      if (roution) {
-        authorizationStore.routine = roution
+      if (routine) {
+        authorizationStore.routine = routine
         authorizationStore.enable = true
       }
-      
+
+      if (cross) {
+        authorizationStore.cross = cross
+      }
+
       if (hibernation) {
         authorizationStore.hibernation = hibernation
       }
@@ -210,21 +235,12 @@ export class VSFetch {
   
   execute({ url, params = {}, method = REQUEST_METHOD.GET, type = RESPONSE_TYPE.JSON }, useFetchOptions = {}) {
     
-    if (!RESPONSE_TYPE_VALUES.includes(type)) {
-      throw new Error('Illegal Params: ' + type)
-    }
-    
-    if (!REQUEST_METHOD_VALUES.includes(method)) {
-      throw new Error('Illegal method: ' + method)
-    }
-    
     const isGet = method === REQUEST_METHOD.GET
     
     if (isGet) {
-      params = isRef(params) ? params.value : params
-      url = toUrl(isRef(url) ? url.value : url, params)
+      url = toUrl(unref(url), unref(params))
     } else {
-      params = this.onRequestParam(isRef(params) ? params.value : params)
+      params = this.onRequestParam(unref(params))
     }
     
     const useFetchShellPrepare = this.useFetch(url, useFetchOptions)
@@ -235,53 +251,32 @@ export class VSFetch {
     
   }
   
-  request({ url, params, method, type }, useFetchOptions = {}) {
-    
-    const run = () => this.execute({ url, params, method, type }, useFetchOptions)
-    
-    if (useFetchOptions.refetch ?? this.config.options.refetch) {
-      if (isRef(url)) {
-        watch(url, () => {
-          run()
-        })
-      }
-      
-      if (isRef(params) || isReactive(params)) {
-        watch(params, () => {
-          run()
-        })
-      }
-    }
-    
-    return run()
+  get({ url, params, method = REQUEST_METHOD.GET, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
   
-  get({ url, params, method = REQUEST_METHOD.GET, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
+  post({ url, params, method = REQUEST_METHOD.POST, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
   
-  post({ url, params, method = REQUEST_METHOD.POST, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
+  put({ url, params, method = REQUEST_METHOD.PUT, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
   
-  put({ url, params, method = REQUEST_METHOD.PUT, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
+  delete({ url, params, method = REQUEST_METHOD.DELETE, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
   
-  delete({ url, params, method = REQUEST_METHOD.DELETE, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
+  patch({ url, params, method = REQUEST_METHOD.PATCH, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
   
-  patch({ url, params, method = REQUEST_METHOD.PATCH, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
+  head({ url, params, method = REQUEST_METHOD.HEAD, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
   
-  head({ url, params, method = REQUEST_METHOD.HEAD, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
-  }
-  
-  options({ url, params, method = REQUEST_METHOD.OPTIONS, type }, useFetchOptions = {}) {
-    return this.request({ url, params, method, type }, useFetchOptions)
+  options({ url, params, method = REQUEST_METHOD.OPTIONS, type }, useFetchOptions) {
+    return this.execute({ url, params, method, type }, useFetchOptions)
   }
 }
 
@@ -293,14 +288,4 @@ const usePromiseChain = (promise, onParams) => {
       onReject(reject)
     })
   })
-}
-
-export const createInstance = fetchConfig => {
-  const context = Reflect.construct(VSFetch, [ fetchConfig ])
-  const instance = ({ url, params, responseType }, requestInit, useFetchOptions, requestMethod) =>
-    context.request.call(context, { url, params, responseType }, requestInit, useFetchOptions, requestMethod)
-  
-  Reflect.setPrototypeOf(instance, context)
-  
-  return instance
 }

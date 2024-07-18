@@ -22,8 +22,6 @@ const { aliveProperty } = useRunning({ attrs, slots, emits, props, name })
 
 const aliveStore = useAliveStore()
 
-const { update } = aliveStore
-
 defineExpose({})
 </script>
 
@@ -31,8 +29,7 @@ defineExpose({})
   <ElMenuItem
       v-if="menuItem[aliveProperty.menuMode] === MENU_MODE.M"
       :route="menuItem[aliveProperty.routeJump]"
-      :index="menuItem[aliveProperty.id]"
-      @click="update(menuItem)">
+      :index="menuItem[aliveProperty.id]">
     <ElIcon>
       <component :is="menuItem[aliveProperty.menuIcon]" />
     </ElIcon>

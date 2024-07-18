@@ -21,6 +21,10 @@ export const useProps = {
   remoteInsert: {
     type: Function,
     default: null
+  },
+  inline: {
+    type: Boolean,
+    default: false
   }
 }
   
@@ -45,7 +49,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
 
   const onInsert = async () => {
-    ElMessageBox.confirm('确认删除吗')
+    ElMessageBox.confirm('确认保存吗')
       .then(() => {
         const { isFetching, then = () => {}, notification = () => {} } = props.remoteInsert(modelValue)
         status.loading.main = isFetching

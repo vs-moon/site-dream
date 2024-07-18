@@ -13,7 +13,7 @@ export default {
     }
     
     // 全局属性
-    app.config.globalProperties.AppName = 'SSOAdmin'
+    app.config.globalProperties.AppName = 'Ac'
     
     // 合并选项
     mergeOptions.forEach(item => {

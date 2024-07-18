@@ -2,7 +2,9 @@
 import { useConst, useEmits, useProps, useRunning } from '.'
 import { useAttrs } from 'vue'
 import { selectOne, insertOne } from '@/api/resource/menu.js'
-import { UpDetailsPage } from '@vs-component/up'
+import { UpDetailsPage, UpDicDrop, UpIcon } from '@vs-component/up'
+import { DIC } from '@vs-component/up/const/enum.js'
+import { iconNames } from '@/plugin/icon/index.js'
 
 const name = 'resourceMenuDetails'
 
@@ -38,7 +40,7 @@ defineExpose({})
         <ElInput v-model="modelValue.modulePath" />
       </ElFormItem>
       <ElFormItem label="路由模式">
-        <ElInput v-model="modelValue.jumpMode" />
+        <UpDicDrop v-model="modelValue.jumpMode" :type="DIC.JUMP_MODE" />
       </ElFormItem>
       <ElFormItem label="路由路径">
         <ElInput v-model="modelValue.routePath" />
@@ -47,16 +49,16 @@ defineExpose({})
         <ElInput v-model="modelValue.routeName" />
       </ElFormItem>
       <ElFormItem label="路由缓存">
-        <ElInput v-model="modelValue.routeAlive" />
+        <UpDicDrop v-model="modelValue.routeAlive" :type="DIC.VALID" />
       </ElFormItem>
       <ElFormItem label="菜单模式">
-        <ElInput v-model="modelValue.menuMode" />
+        <UpDicDrop v-model="modelValue.menuMode" :type="DIC.MENU_MODE" />
       </ElFormItem>
       <ElFormItem label="菜单名称">
         <ElInput v-model="modelValue.menuName" />
       </ElFormItem>
       <ElFormItem label="菜单图标">
-        <ElInput v-model="modelValue.menuIcon" />
+        <UpIcon v-model="modelValue.menuIcon" :icon-names="iconNames" />
       </ElFormItem>
     </UpDetailsPage>
   </section>
