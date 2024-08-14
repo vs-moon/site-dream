@@ -1,19 +1,18 @@
 <script setup>
-import { useEmits, useProps, useRunning } from '.'
+import { useOptions, useRunning } from './index.js'
 import { useAttrs } from 'vue'
 import { useIconNames } from '../../plugins/icon/index.js'
 
 const name = 'UpIconDrop'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
 const slots = defineSlots()
-const emits = defineEmits([ ...useEmits ])
-const props = defineProps({ ...useProps })
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 const modelValue = defineModel()
 
 const {} = useRunning({ attrs, slots, emits, props, name })
@@ -24,29 +23,32 @@ defineExpose({})
 </script>
 
 <template>
-  <ElSelect v-model="modelValue" filterable>
-    <template #prefix>
-      <ElIcon size="18" :color="color">
-        <component v-if="modelValue" :is="modelValue" />
-      </ElIcon>
-    </template>
+  <ElSelect
+    v-model="modelValue"
+    filterable
+    clearable
+    placeholder=""
+    value-on-clear="">
     <ElOption
       v-for="iconName in iconNames"
       :key="iconName"
       :label="iconName"
       :value="iconName">
-      <span style="float: left;">{{ iconName }}</span>
-      <span style="float: right;">
-        <ElIcon size="18">
-          <component :is="iconName"></component>
-        </ElIcon>
-      </span>
+      <ElIcon size="18" style="margin-right: 10px">
+        <component :is="iconName"></component>
+      </ElIcon>
+      {{ iconName }}
     </ElOption>
   </ElSelect>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .el-select {
   min-width: 200px;
+}
+
+.el-select-dropdown__item {
+  display: flex;
+  align-items: center;
 }
 </style>

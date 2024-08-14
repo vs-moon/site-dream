@@ -1,0 +1,11 @@
+export { default } from './fetch/index.js'
+
+export * as apiFetch from './units/api.js'
+export * as appFetch from './units/app.js'
+export * as configFetch from './units/config.js'
+export * as dicFetch from './units/dic.js'
+export * as dicTypeFetch from './units/dicType.js'
+export * as orgFetch from './units/org.js'
+export * as permissionFetch from './units/permission.js'
+export * as roleFetch from './units/role.js'
+export * as routeFetch from './units/route.js'

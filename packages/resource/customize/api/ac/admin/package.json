@@ -1,0 +1,13 @@
+{
+  "name": "@vs-customize/api-ac-admin",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "定制化接口-认证中心-管理端",
+  "author": "xiao",
+  "dependencies": {
+    "@vs-common/utils": "workspace:*",
+    "@vs-customize/fetch": "workspace:*"
+  }
+}

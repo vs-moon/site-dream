@@ -1,6 +1,6 @@
 import { provide, reactive } from 'vue'
 
-export const useOptions = Object.freeze({
+export const useOptions = {
   key: Symbol('CUSTOMIZE_UP_ASIDE'),
   confine: {},
   emits: [],
@@ -14,7 +14,7 @@ export const useOptions = Object.freeze({
       default: 'Vue'
     }
   }
-})
+}
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
@@ -22,7 +22,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     collapse: false
   })
   
-  provide(useConst.key, status)
+  provide(useOptions.key, status)
   
   return {
     status

@@ -1,99 +1,100 @@
 import { nextTick, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { TypeUtils, ArrayUtils, PackageUtils, VALID, VIEW_MODE, VALID_TEXT } from '@vs-common/utils'
-import { useScope } from '@vs-common/hook'
+import { useEffectScope } from '@vs-common/hook'
+import { TypeUtils, ArrayUtils, PackageUtils } from '@vs-common/utils'
+import { VALID, VIEW_MODE, VALID_TEXT } from '@vs-customize/const'
 
+const eventClick = 'click'
+const eventCheckbox = 'checkbox'
+const eventClose = 'close'
+const eventSubmit = 'submit'
+const eventAppend = 'append'
+const eventEdit = 'edit'
 
-export const vsConst = {
-  key: Symbol('UP_BRANCH'),
-  enum: {
+export const useOptions = {
+  key: Symbol('CUSTOMIZE_UP_BRANCH'),
+  confine: {
     FLAG: {
       NEW: 'X',
       ROOT: '0'
     }
-  }
-}
-
-export const vsEmits = [
-  'click',
-  'checkbox',
-  'close',
-  'submit',
-  'view:mode',
-  'remote:query',
-  'remote:valid',
-  'remote:remove'
-]
-
-export const vsProps = {
-  editable: {
-    type: Boolean,
-    default: false
   },
-  checkbox: {
-    type: Boolean,
-    default: false
-  },
-  draggable: {
-    type: Boolean,
-    default: false
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  lazy: {
-    type: Boolean,
-    default: false
-  },
-  remoteQuery: {
-    type: Function,
-    default: null
-  },
-  remoteRemove: {
-    type: Function,
-    default: null
-  },
-  remoteUpdate: {
-    type: Function,
-    default: null
-  },
-  remoteValid: {
-    type: Function,
-    default: null
-  },
-  valueKey: {
-    type: String,
-    default: 'code'
-  },
-  validKey: {
-    type: String,
-    default: 'valid'
-  },
-  nodeKey: {
-    type: String,
-    default: 'id'
-  },
-  parentKey: {
-    type: String,
-    default: 'parentId'
-  },
-  defaultProps: {
-    label: 'name',
-    disabled: 'disabled',
-    children: 'children',
-    isLeaf: 'leaf',
-    validTruly: '1',
-    validFalsely: '0'
+  emits: [
+    eventClick,
+    eventCheckbox,
+    eventClose,
+    eventSubmit,
+  ],
+  props: {
+    editable: {
+      type: Boolean,
+      default: false
+    },
+    checkbox: {
+      type: Boolean,
+      default: false
+    },
+    draggable: {
+      type: Boolean,
+      default: false
+    },
+    loading: {
+      type: Boolean,
+      default: false
+    },
+    lazy: {
+      type: Boolean,
+      default: false
+    },
+    remoteQuery: {
+      type: Function,
+      default: null
+    },
+    remoteRemove: {
+      type: Function,
+      default: null
+    },
+    remoteUpdate: {
+      type: Function,
+      default: null
+    },
+    remoteValid: {
+      type: Function,
+      default: null
+    },
+    valueKey: {
+      type: String,
+      default: 'code'
+    },
+    validKey: {
+      type: String,
+      default: 'valid'
+    },
+    nodeKey: {
+      type: String,
+      default: 'id'
+    },
+    parentKey: {
+      type: String,
+      default: 'pid'
+    },
+    defaultProps: {
+      label: 'name',
+      disabled: 'disabled',
+      children: 'children',
+      isLeaf: 'leaf',
+      validTruly: '1',
+      validFalsely: '0'
+    }
   }
 }
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
-  const { FLAG } = vsConst.enum
+  const { FLAG } = useOptions.confine
   
   const condition = reactive({
-    source: ''
+    app: ''
   })
   
   const dataset = reactive({
@@ -115,7 +116,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
   const elTreeRef = ref()
   
-  useScope(() => {
+  useEffectScope(() => {
     watch(() => dataset.screenText, newVal => {
       elTreeRef.value.filter(newVal)
     })
@@ -175,7 +176,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
   const onCheck = (data, node, indeterminate) => {
     dataset.checkedKeys = node.checkedKeys
     dataset.checkedNodes = node.checkedNodes
-    emits('checkbox', node.checkedNodes, node.checkedKeys)
+    emits(eventCheckbox, node.checkedNodes, node.checkedKeys)
   }
   
   /**
@@ -187,10 +188,10 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
    */
   const onClick = (data, node, treeNode, pointerEvent) => {
     const { children, ...residue } = data
-    emits('view:mode', {
+    emits(eventClick, {
       data: residue,
       key: node.key === FLAG.NEW ? FLAG.NEW : node.key,
-      viewMode: node.key === FLAG.NEW ? VIEW_MODE.ADD : VIEW_MODE.VIEW
+      vm: node.key === FLAG.NEW ? VIEW_MODE.ADD : VIEW_MODE.VIEW
     })
   }
   
@@ -214,7 +215,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
       }
     }
     
-    emits('view:mode', { data: dataset.newNode, key: FLAG.NEW, viewMode: VIEW_MODE.ADD })
+    emits(eventAppend, { data: dataset.newNode, key: FLAG.NEW, vm: VIEW_MODE.ADD })
   }
   
   /**
@@ -224,7 +225,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
    */
   const onEdit = (node, data) => {
     const { children, ...residue } = data
-    emits('view:mode', { data: residue, key: node.key, viewMode: VIEW_MODE.MODIFY })
+    emits(eventEdit, { data: residue, key: node.key, vm: VIEW_MODE.MODIFY })
   }
   
   /**
@@ -265,7 +266,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     dataset.checkedNodes = []
     dataset.checkedKeys = []
     elTreeRef.value.setCheckedKeys([])
-    emits('close', false)
+    emits(eventClose, false)
   }
   
   /**
@@ -276,7 +277,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
       if (ArrayUtils.isEmpty(dataset.checkedNodes) && ArrayUtils.isEmpty(dataset.checkedKeys)) {
         ElMessage.warning('请选择节点')
       } else {
-        emits('submit', dataset.checkedNodes, dataset.checkedKeys)
+        emits(eventSubmit, dataset.checkedNodes, dataset.checkedKeys)
       }
     }
   }
@@ -318,8 +319,6 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
         })
       }
     })
-    
-    emits('remote:query', dataset.dataSource)
   }
   
   /**

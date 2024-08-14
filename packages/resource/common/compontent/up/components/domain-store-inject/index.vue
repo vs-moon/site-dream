@@ -5,8 +5,7 @@ import { useAttrs } from 'vue'
 const name = 'UpDomainStoreInject'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()

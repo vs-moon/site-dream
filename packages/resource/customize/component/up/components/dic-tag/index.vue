@@ -1,32 +1,29 @@
 <script setup>
-import { useConst, useEmits, useProps, useRunning } from '.'
+import { useOptions, useRunning } from './index.js'
 import { computed, useAttrs } from 'vue'
+import { useDicStore } from '@vs-customize/plugin'
 
-import { useDicStore } from '@vs-common/utils'
-
-const name = 'UpDicTag'
+const name = 'CustomizeUpDicTag'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
 const slots = defineSlots()
-const emits = defineEmits([ ...useEmits ])
-const props = defineProps({ ...useProps })
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 const modelValue = defineModel()
 
 const {} = useRunning({ attrs, slots, emits, props, name })
 
 const dicStore = useDicStore()
-const colorComputed = computed(() => dicStore.dicCache?.[props.type]?.[modelValue.value])
-dicStore.remoteDic(props.type)
+const dicComputed = computed(() => dicStore.dicCache(props.type)[modelValue.value])
 </script>
 
 <template>
-  <ElTag :color="colorComputed?.color">
-    {{ colorComputed?.name }}
+  <ElTag :color="dicComputed?.color" style="color: white" size="default">
+    {{ dicComputed?.name }}
   </ElTag>
 </template>
 

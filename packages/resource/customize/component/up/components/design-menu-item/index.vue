@@ -1,61 +1,59 @@
 <script setup>
-import { useEmits, useProps, useRunning } from '.'
+import { useOptions, useRunning } from './index.js'
 import { computed, useAttrs } from 'vue'
-import { MENU_MODE, VALID } from '@vs-common/utils'
-import { isEmpty } from '@vs-common/utils/array/index.js'
-import { UpMenuItem } from '../index.js'
+import { ArrayUtils } from '@vs-common/utils'
+import { NAV_TYPE, VALID, PROPERTY_ROUTE } from '@vs-customize/const'
+import { CustomizeUpDesignMenuItem } from '../index.js'
 
-const name = 'UpMenuItem'
+const name = 'CustomizeUpDesignMenuItem'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
 const slots = defineSlots()
-const emits = defineEmits([ ...useEmits ])
-const props = defineProps({ ...useProps })
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 
-const { aliveProperty } = useRunning({ attrs, slots, emits, props, name })
+const { } = useRunning({ attrs, slots, emits, props, name })
 
-const showMenuItem = computed(() => props.menuItem[aliveProperty.menuMode] === MENU_MODE.M && props.menuItem[aliveProperty.hide] !== VALID.T)
-const showSubMenu = computed(() => props.menuItem[aliveProperty.menuMode] === MENU_MODE.P && !isEmpty(props.menuItem[aliveProperty.children]))
+const showMenuItem = computed(() => props.routeItem[PROPERTY_ROUTE.type] === NAV_TYPE.V && props.routeItem[PROPERTY_ROUTE.hide] !== VALID.T)
+const showSubMenu = computed(() => props.routeItem[PROPERTY_ROUTE.type] === NAV_TYPE.P && !ArrayUtils.isEmpty(props.routeItem[PROPERTY_ROUTE.children]))
 
 defineExpose({})
 </script>
 
 <template>
   <ElMenuItem
-      v-if="showMenuItem"
-      :route="menuItem[aliveProperty.routeJump]"
-      :index="menuItem[aliveProperty.id]">
+    v-if="showMenuItem"
+    :route="routeItem[PROPERTY_ROUTE.routeJump]"
+    :index="routeItem[PROPERTY_ROUTE.id]">
     <ElIcon>
-      <component :is="menuItem[aliveProperty.menuIcon]" />
+      <component :is="routeItem[PROPERTY_ROUTE.icon]" />
     </ElIcon>
     <span>
-      {{ menuItem[aliveProperty.menuName] }}
+      {{ routeItem[PROPERTY_ROUTE.title] }}
     </span>
   </ElMenuItem>
 
   <ElSubMenu
-      v-else-if="showSubMenu"
-      :index="menuItem[aliveProperty.id]">
+    v-else-if="showSubMenu"
+    :index="routeItem[PROPERTY_ROUTE.id]">
     <template #title>
       <ElIcon>
-        <component :is="menuItem[aliveProperty.menuIcon]" />
+        <component :is="routeItem[PROPERTY_ROUTE.icon]" />
       </ElIcon>
       <span>
-        {{ menuItem[aliveProperty.menuName] }}
+        {{ routeItem[PROPERTY_ROUTE.title] }}
       </span>
     </template>
 
-    <UpMenuItem
-        v-for="_subItem in menuItem[aliveProperty.children]"
-        :key="_subItem[aliveProperty.id]"
-        :menuItem="_subItem" />
+    <CustomizeUpDesignMenuItem
+      v-for="_subItem in routeItem[PROPERTY_ROUTE.children]"
+      :key="_subItem[PROPERTY_ROUTE.id]"
+      :routeItem="_subItem" />
   </ElSubMenu>
 </template>
 
-<style lang="scss">
-</style>
+<style lang="scss" scoped />

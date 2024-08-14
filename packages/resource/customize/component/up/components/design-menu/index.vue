@@ -1,30 +1,28 @@
 <script setup>
-import { useEmits, useProps, useRunning } from '.'
+import { useOptions, useRunning } from './index.js'
 import { inject, useAttrs } from 'vue'
+import { useAliveStore, useRouteStore } from '@vs-customize/plugin'
+import { CustomizeUpDesignMenuItem } from '../index.js'
+import { useOptions as useOptionsAside } from '../design-aside/index.js'
 
-import { useAliveStore, useMenuStore } from '@vs-common/utils'
-import { useConst as useConstAside } from '../aside/index.js'
-import { UpMenuItem } from '../index.js'
-
-const name = 'UpMenu'
+const name = 'CustomizeUpDesignMenu'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
 const slots = defineSlots()
-const emits = defineEmits([ ...useEmits ])
-const props = defineProps({ ...useProps })
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 
 const {} = useRunning({ attrs, slots, emits, props, name })
 
-const status = inject(useConstAside.key, {
+const status = inject(useOptionsAside.key, {
   collapse: false
 })
 
-const menuStore = useMenuStore()
+const routeStore = useRouteStore()
 const aliveStore = useAliveStore()
 
 defineExpose({})
@@ -38,10 +36,10 @@ defineExpose({})
     :close-on-click-outside="mode === 'horizontal'"
     :collapse="collapse ?? status.collapse"
     :default-active="aliveStore.active">
-    <UpMenuItem
-      v-for="item in menuStore.nesting"
+    <CustomizeUpDesignMenuItem
+      v-for="item in routeStore.nesting"
       :key="item.id"
-      :menu-item="item" />
+      :route-item="item" />
   </ElMenu>
 </template>
 

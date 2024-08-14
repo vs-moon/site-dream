@@ -1,0 +1,22 @@
+/* ########## 文本颜色 */
+$vs-color-text: #E6EDF3;
+$vs-color-link: #10B981;
+
+
+/* ########## 边框颜色 */
+$vs-color-border: #30363D;
+$vs-color-border-input: $vs-color-link;
+
+/* ########## 背景颜色 */
+$vs-background: #202124;
+
+/* ########## 背景颜色 */
+$vs-alpha-white: rgba(255, 255, 255, 0.1);
+$vs-alpha-black: rgba(0, 0, 0, 0.3);
+
+/* ########## 边框线 */
+$vs-border-line: solid 1px $vs-color-border;
+$vs-border-line-input: solid 2px $vs-color-border-input;
+
+/* ########## 阴影 */
+$vs-box-shadow: 0px 0px 12px rgba(0, 0, 0, .72);

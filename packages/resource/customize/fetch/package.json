@@ -1,0 +1,13 @@
+{
+  "name": "@vs-customize/fetch",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "定制化请求",
+  "author": "xiao",
+  "dependencies": {
+    "@vs-common/utils": "workspace:*",
+    "@vs-customize/plugin": "workspace:*"
+  }
+}

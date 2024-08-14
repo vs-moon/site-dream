@@ -1,0 +1,24 @@
+{
+  "name": "ac-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "认证中心-前台",
+  "author": "xiao",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vs-common/const": "workspace:*",
+    "@vs-common/hook": "workspace:*",
+    "@vs-common/utils": "workspace:*",
+    "@vs-common/component-up": "workspace:*",
+    "@vs-customize/api-ac-client": "workspace:*",
+    "@vs-customize/api-resource": "workspace:*",
+    "@vs-customize/component-up": "workspace:*",
+    "@vs-customize/const": "workspace:*",
+    "@vs-customize/plugin": "workspace:*"
+  }
+}

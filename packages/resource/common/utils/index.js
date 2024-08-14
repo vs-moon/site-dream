@@ -1,9 +1,6 @@
 // 数组
 export * from './array/index.js'
 export * as ArrayUtils from './array/index.js'
-// 常量
-export * from './const/index.js'
-export * as ConstUtils from './const/index.js'
 // 日期
 export * from './date/index.js'
 export * as DateUtils from './date/index.js'
@@ -16,7 +13,7 @@ export * as FetchUtils from './fetch/index.js'
 // Message
 export * from './message/index.js'
 export * as MessageUtils from './message/index.js'
-// 对象
+// 数字
 export * from './number/index.js'
 export * as NumberUtils from './number/index.js'
 // 对象
@@ -25,15 +22,9 @@ export * as ObjectUtils from './object/index.js'
 // 包装
 export * from './package/index.js'
 export * as PackageUtils from './package/index.js'
-// router
-export * from './router/index.js'
-export * as RouterUtils from './router/index.js'
 // 流程
 export * from './step/index.js'
 export * as StepUtils from './step/index.js'
-// 流程
-export * from './store/index.js'
-export * as StoreUtils from './store/index.js'
 // 字符串
 export * from './string/index.js'
 export * as StringUtils from './string/index.js'

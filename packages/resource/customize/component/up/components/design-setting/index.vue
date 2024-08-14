@@ -1,40 +1,52 @@
 <script setup>
-  import { useEmits, useProps, useRunning } from './index.js'
-  import { useAttrs } from 'vue'
+import { useOptions, useRunning } from './index.js'
+import { useAttrs } from 'vue'
+import { CustomizeUpDesignSettingCache } from '../index.js'
 
-  const name = 'UpSetting'
+const name = 'CustomizeUpDesignSetting'
 
-  defineOptions({
-    name,
-    inheritAttrs: false
-  })
+defineOptions({
+  name
+})
 
-  const attrs = useAttrs()
-  const slots = defineSlots()
-  const emits = defineEmits([ ...useEmits ])
-  const props = defineProps({ ...useProps })
-  const modelValue = defineModel()
+const attrs = useAttrs()
+const slots = defineSlots()
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
+const modelValue = defineModel()
 
-  const {
-    onClose
-  } = useRunning({ attrs, slots, emits, props, name })
+const {
+  onClose
+} = useRunning({ attrs, slots, emits, props, name })
 
-  defineExpose({})
+defineExpose({})
 </script>
 
 <template>
   <ElDrawer
-    class="up-tools-setting"
+    class="customize-up-design-setting"
     v-model="modelValue"
-    @close="onClose">
-    Drawer
+    @close="onClose"
+    size="50%"
+    :with-header="false">
+    <ElTabs tab-position="left" style="height: 100%" stretch>
+      <ElTabPane label="缓存">
+        <CustomizeUpDesignSettingCache />
+      </ElTabPane>
+    </ElTabs>
   </ElDrawer>
 </template>
 
 <style lang="scss">
-  .up-tools-setting.rtl {
-    top: 75px !important;
-    width: 20% !important;
-    height: calc(100% - 75px);
+.el-tabs__content {
+  //height: calc(100% - 55px);
+  height: 100%;
+  padding: 10px;
+  //border: 1px solid #414243;
+  border-radius: 5px;
+
+  .el-tab-pane {
+    height: 100%;
   }
+}
 </style>

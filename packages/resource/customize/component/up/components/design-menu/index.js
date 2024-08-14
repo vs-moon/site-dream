@@ -1,22 +1,20 @@
-export const useConst = {
-  key: Symbol('UP_MENU'),
-  enum: {}
-}
-
-export const useEmits = []
-
-export const useProps = {
-  favicon: {
-    type: String,
-    default: '/favicon.ico'
-  },
-  mode: {
-    type: String,
-    default: 'vertical'
-  },
-  collapse: {
-    type: Boolean,
-    default: undefined
+export const useOptions = {
+  key: Symbol('CUSTOMIZE_UP_DESIGN_MENU'),
+  confine: {},
+  emits: [],
+  props: {
+    favicon: {
+      type: String,
+      default: '/favicon.ico'
+    },
+    mode: {
+      type: String,
+      default: 'vertical'
+    },
+    collapse: {
+      type: Boolean,
+      default: undefined
+    }
   }
 }
 

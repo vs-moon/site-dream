@@ -1,11 +1,11 @@
 import { onMounted, ref } from 'vue'
 import { useEventListener } from '@vueuse/core'
 
-const eventResponse = 'event:response'
-const eventUnlike = 'event:unlike'
-const eventQuit = 'event:quit'
+const eventResponse = 'response'
+const eventUnlike = 'unlike'
+const eventQuit = 'quit'
 
-export const useOptions = Object.freeze({
+export const useOptions = {
   key: Symbol('UP_DOMAIN_STORE_INJECT'),
   confine: {},
   emits: [
@@ -23,7 +23,7 @@ export const useOptions = Object.freeze({
       default: false
     }
   }
-})
+}
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
   const iframeRef = ref(null)

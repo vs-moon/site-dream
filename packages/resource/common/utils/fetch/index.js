@@ -1,27 +1,24 @@
-import { isReactive, isRef, toRaw, unref, watch } from 'vue'
+import { toRaw, toValue, unref } from 'vue'
 import { createFetch } from '@vueuse/core'
 import { ElNotification } from 'element-plus'
 
 import { toUrl } from '../url/index.js'
 import { removeEmptyProp } from '../package/index.js'
-import { isNumber, isObject } from '../type/index.js'
-import { useAuthorizationStore, useReset } from '../store/index.js'
-import { useRouter, ROUTE_CONST } from '../router/index.js'
-
-const router = useRouter()
+import { isEmpty } from '../object/index.js'
+import { isNumber, isObject, isFalsely } from '../type/index.js'
 
 // 鉴权头
-export const AUTHORIZATION_HEAD = {
+export const AUTHORIZATION_HEAD = Object.freeze({
   AUTHORIZATION: 'Authorization',
   AUTHORIZATION_CROSS: 'Authorization-Cross',
   AUTHORIZATION_CROSS_SITE: 'Authorization-Cross-Site',
   AUTHORIZATION_RENEWAL: 'Authorization-Renewal',
   AUTHORIZATION_HIBERNATION: 'Authorization-Hibernation',
   AUTHORIZATION_REMEMBER: 'Authorization-Remember'
-}
+})
 
 // 请求方式
-export const REQUEST_METHOD = {
+export const REQUEST_METHOD = Object.freeze({
   GET: 'get',
   POST: 'post',
   PUT: 'put',
@@ -29,22 +26,22 @@ export const REQUEST_METHOD = {
   PATCH: 'patch',
   OPTIONS: 'options',
   HEAD: 'head'
-}
+})
 
 // 请求方式 values
-export const REQUEST_METHOD_VALUES = Object.values(REQUEST_METHOD)
+const REQUEST_METHOD_VALUES = Object.values(REQUEST_METHOD)
 
 // 响应类型
-export const RESPONSE_TYPE = {
+export const RESPONSE_TYPE = Object.freeze({
   JSON: 'json',
   TEXT: 'text',
   BLOB: 'blob',
   ARRAY_BUFFER: 'arrayBuffer',
   FORM_DATA: 'formData'
-}
+})
 
 // 响应类型 values
-export const RESPONSE_TYPE_VALUES = Object.values(RESPONSE_TYPE)
+const RESPONSE_TYPE_VALUES = Object.values(RESPONSE_TYPE)
 
 // 第三方 useFetch 参数选项
 class UseFetchOptions {
@@ -78,6 +75,7 @@ class FetchConfig {
   constructor({ baseUrl, combination = 'chain', options, fetchOptions = { mode: 'cors' } } = {}) {
     this.baseUrl = baseUrl
     this.combination = combination
+    // useFetch 选项
     this.options = Reflect.construct(UseFetchOptions, [ options ])
     // fetch 原生选项
     this.fetchOptions = Reflect.construct(Request, [ '', { ...fetchOptions } ])
@@ -87,6 +85,7 @@ class FetchConfig {
 // 自定义 Fetch 类
 export class VSFetch {
   authorization
+  failNotification
   config
   useFetch
   
@@ -95,10 +94,12 @@ export class VSFetch {
     combination,
     options,
     fetchOptions,
-    authorization = true
+    authorization = true,
+    failNotification = true
   }) {
     
     this.authorization = authorization
+    this.failNotification = failNotification
     
     this.config = Reflect.construct(FetchConfig,
       [{
@@ -116,9 +117,9 @@ export class VSFetch {
   }
   
   onNotification(data) {
-    const { success, message } = toRaw(data)
+    const { success, message = '' } = toRaw(data)
     ElNotification({
-      title: success ? 'Success' : 'Fail',
+      title: success ? '请求成功' : '请求失败',
       type: success ? 'success' : 'error',
       message,
       offset: 80,
@@ -142,74 +143,12 @@ export class VSFetch {
   }
   
   async onRequestBefore({ options, cancel, url },) {
-    
-    if (this.authorization) {
-      
-      const authorizationStore = useAuthorizationStore()
-      
-      const routine = authorizationStore.routine
-      const hibernation = authorizationStore.hibernation
-      const remember = authorizationStore.remember
-
-      if (routine) {
-        options.headers[AUTHORIZATION_HEAD.AUTHORIZATION] = routine
-      }
-      
-      if (hibernation) {
-        options.headers[AUTHORIZATION_HEAD.AUTHORIZATION_HIBERNATION] = hibernation
-      }
-
-      if (remember) {
-        options.headers[AUTHORIZATION_HEAD.AUTHORIZATION_REMEMBER] = remember
-      }
-    }
-    
     return {
       options
     }
   }
   
   onResponseAfter({ response, data }) {
-    
-    if (this.authorization) {
-      
-      const { code } = data
-      
-      const routine = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION)
-      const renewal = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION_RENEWAL)
-      const cross = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION_CROSS)
-      const crossSite = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION_CROSS_SITE)
-      const hibernation = response.headers.get(AUTHORIZATION_HEAD.AUTHORIZATION_HIBERNATION)
-      
-      const authorizationStore = useAuthorizationStore()
-      
-      if (routine) {
-        authorizationStore.routine = routine
-        authorizationStore.enable = true
-      }
-      
-      if (renewal) {
-        authorizationStore.routine = renewal
-      }
-
-      if (cross) {
-        authorizationStore.cross = cross
-      }
-      
-      if (crossSite) {
-        authorizationStore.crossSite = crossSite
-      }
-      
-      if (hibernation) {
-        authorizationStore.hibernation = hibernation
-      }
-      
-      if (code === 10011) {
-        useReset()
-        router.value.push({ path: ROUTE_CONST.entrance.path })
-      }
-    }
-    
     return {
       response,
       data
@@ -217,6 +156,17 @@ export class VSFetch {
   }
   
   onCatch({ response, data, error }) {
+    
+    const { message } = data
+    
+    ElNotification({
+      title: 'Fail',
+      type: 'error',
+      message,
+      offset: 80,
+      duration: 1000
+    })
+    
     return { response, data, error }
   }
   
@@ -228,7 +178,7 @@ export class VSFetch {
     } = useFetchShell
     
     const notification = () => {
-      this.onNotification(data)
+      this.onNotification(toValue(data))
     }
     
     const unpacking = () => ({ ...unref(data) })
@@ -247,10 +197,20 @@ export class VSFetch {
   
   execute({ url, params = {}, method = REQUEST_METHOD.GET, type = RESPONSE_TYPE.JSON }, useFetchOptions = {}) {
     
+    if (!REQUEST_METHOD_VALUES.includes(method)) {
+      throw new Error(`Request methods beyond the agreement: ${method}`)
+    }
+    
+    if (!RESPONSE_TYPE_VALUES.includes(type)) {
+      throw new Error(`Response type beyond the agreement: ${type}`)
+    }
+    
     const isGet = method === REQUEST_METHOD.GET
     
     if (isGet) {
-      url = toUrl(unref(url), unref(params))
+      if (!isEmpty(params) && !isFalsely(params)) {
+        url = toUrl(unref(url), unref(params))
+      }
     } else {
       params = this.onRequestParam(unref(params))
     }
@@ -263,32 +223,32 @@ export class VSFetch {
     
   }
   
-  get({ url, params, method = REQUEST_METHOD.GET, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  get({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.GET, type }, useFetchOptions)
   }
   
-  post({ url, params, method = REQUEST_METHOD.POST, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  post({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.POST, type }, useFetchOptions)
   }
   
-  put({ url, params, method = REQUEST_METHOD.PUT, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  put({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.PUT, type }, useFetchOptions)
   }
   
-  delete({ url, params, method = REQUEST_METHOD.DELETE, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  delete({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.DELETE, type }, useFetchOptions)
   }
   
-  patch({ url, params, method = REQUEST_METHOD.PATCH, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  patch({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.PATCH, type }, useFetchOptions)
   }
   
-  head({ url, params, method = REQUEST_METHOD.HEAD, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  head({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.HEAD, type }, useFetchOptions)
   }
   
-  options({ url, params, method = REQUEST_METHOD.OPTIONS, type }, useFetchOptions) {
-    return this.execute({ url, params, method, type }, useFetchOptions)
+  options({ url, params, type }, useFetchOptions = {}) {
+    return this.execute({ url, params, method: REQUEST_METHOD.OPTIONS, type }, useFetchOptions)
   }
 }
 

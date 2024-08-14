@@ -1,4 +1,4 @@
-import { RESPONSE_STATUS } from '../const/index.js'
+import { RESPONSE_STATUS } from '@vs-common/const'
 
 /**
  * 通用响应体
@@ -8,13 +8,18 @@ import { RESPONSE_STATUS } from '../const/index.js'
  * @param message
  * @returns {{code: number, data: null, success: boolean, message: string}}
  */
-export const commonResponse = ({ success = true, code = RESPONSE_STATUS.SUCCESS.code, data = null, message = '' } = {}) => {
-    return {
-        success,
-        code,
-        data,
-        message
-    }
+export const commonResponse = ({
+  success = true,
+  code = RESPONSE_STATUS.SUCCESS.code,
+  data = null,
+  message = ''
+} = {}) => {
+  return {
+    success,
+    code,
+    data,
+    message
+  }
 }
 
 /**
@@ -24,9 +29,9 @@ export const commonResponse = ({ success = true, code = RESPONSE_STATUS.SUCCESS.
  * @returns {{code: number, data: null, success: boolean, message: string}}
  */
 export const commonResponseSuccess = ({ data } = {}) => {
-    return commonResponse({
-        data
-    })
+  return commonResponse({
+    data
+  })
 }
 
 /**
@@ -34,16 +39,16 @@ export const commonResponseSuccess = ({ data } = {}) => {
  * @returns {{code: number, data: null, success: boolean, message: string}}
  */
 export const commonResponseFail = () => {
-    return commonResponse({
-        success: false,
-        code: RESPONSE_STATUS.FAIL.code
-    })
+  return commonResponse({
+    success: false,
+    code: RESPONSE_STATUS.FAIL.code
+  })
 }
 
 export const commonResponseFailBy = (responseStatus = RESPONSE_STATUS.FAIL) => {
-    return commonResponse({
-        success: false,
-        code: responseStatus.code,
-        message: responseStatus.message
-    })
+  return commonResponse({
+    success: false,
+    code: responseStatus.code,
+    message: responseStatus.message
+  })
 }

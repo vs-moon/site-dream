@@ -1,14 +1,12 @@
-export const useConst = {
+export const useOptions = {
   key: Symbol('UP_ICON_DROP'),
-  enum: {}
-}
-
-export const useEmits = []
-
-export const useProps = {
-  color: {
-    type: String,
-    default: 'teal'
+  confine: {},
+  emits: [],
+  props: {
+    color: {
+      type: String,
+      default: 'teal'
+    }
   }
 }
 

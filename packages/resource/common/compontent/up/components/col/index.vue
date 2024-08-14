@@ -1,26 +1,25 @@
 <script setup>
-  import { useConst, useEmits, useProps, useRunning } from '.'
-  import { useAttrs } from 'vue'
+import { useOptions, useRunning } from './index.js'
+import { useAttrs } from 'vue'
 
-  const name = 'UpCol'
+const name = 'UpCol'
 
-  defineOptions({
-    name,
-    inheritAttrs: false
-  })
+defineOptions({
+  name
+})
 
-  const attrs = useAttrs()
-  const slots = defineSlots()
-  const emits = defineEmits([ ...useEmits ])
-  const props = defineProps({ ...useProps })
+const attrs = useAttrs()
+const slots = defineSlots()
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 
-  const {
-    spanClose,
-    spanArea,
-    spanBox,
-    spanIcon,
-    onChange
-  } = useRunning({ attrs, slots, emits, props, name })
+const {
+  spanClose,
+  spanArea,
+  spanBox,
+  spanIcon,
+  onChange
+} = useRunning({ attrs, slots, emits, props, name })
 
 </script>
 
@@ -49,37 +48,37 @@
 </template>
 
 <style scoped lang="scss">
-  .up-col {
-    transition: all .3s linear;
+.up-col {
+  transition: all .3s linear;
 
-    > .el-row {
-      border-radius: 5px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      background: #1D1E1F;
+  > .el-row {
+    border-radius: 5px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: #1D1E1F;
 
-      > .up-col_icon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    > .up-col_icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-        > i:hover {
-          transform: scale(1.2);
-          transform-origin: center;
+      > i:hover {
+        transform: scale(1.2);
+        transform-origin: center;
 
-          &:nth-of-type(1) {
-            color: inherit;
-          }
+        &:nth-of-type(1) {
+          color: inherit;
+        }
 
-          &:nth-of-type(2) {
-            color: #0099FF;
-          }
+        &:nth-of-type(2) {
+          color: #0099FF;
         }
       }
     }
   }
+}
 
-  .el-col {
-    height: 60px;
-  }
+.el-col {
+  height: 60px;
+}
 </style>

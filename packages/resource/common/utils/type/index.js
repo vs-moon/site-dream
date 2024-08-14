@@ -1,5 +1,5 @@
+import { JS_TYPE } from '@vs-common/const'
 import { isEmpty } from '../string/index.js'
-import { JS_TYPE } from '../const/index.js'
 
 /**
  * 类型

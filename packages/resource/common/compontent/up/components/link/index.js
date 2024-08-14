@@ -1,18 +1,16 @@
 import { RouterLink, useLink } from 'vue-router'
 import { computed } from 'vue'
 
-export const useConst = {
+export const useOptions = {
   key: Symbol('UP_LINK'),
-  enum: {}
+  confine: {},
+  emits: [],
+  props: {
+    ...RouterLink.props,
+    inactiveClass: String
+  }
 }
 
-export const useEmits = []
-
-export const useProps = {
-  ...RouterLink,
-    inactiveClass: String,
-}
-  
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
 
   const {
@@ -23,7 +21,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     isExactActive
   } = useLink(props)
 
-  const isExternalLink = computed(() => typeof this.to === 'string' && this.to.startsWith('http'))
+  const isExternalLink = computed(() => typeof props.to === 'string' && props.to.startsWith('http'))
 
   return {
     navigate,

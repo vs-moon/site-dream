@@ -1,0 +1,21 @@
+{
+  "name": "@vs-customize/component-up",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "定制化组件库 PC",
+  "author": "xiao",
+  "dependencies": {
+    "@vs-common/const": "workspace:*",
+    "@vs-common/hook": "workspace:*",
+    "@vs-common/utils": "workspace:*",
+    "@vs-common/component-up": "workspace:*",
+    "@vs-customize/api-ac-admin": "workspace:*",
+    "@vs-customize/api-ac-client": "workspace:*",
+    "@vs-customize/api-ac-deploy": "workspace:*",
+    "@vs-customize/api-resource": "workspace:*",
+    "@vs-customize/const": "workspace:*",
+    "@vs-customize/plugin": "workspace:*"
+  }
+}

@@ -1,12 +1,11 @@
 <script setup>
-import { useOptions, useRunning } from '.'
+import { useOptions, useRunning } from './index.js'
 import { useAttrs } from 'vue'
 
 const name = 'UpDomainStoreProvide'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()

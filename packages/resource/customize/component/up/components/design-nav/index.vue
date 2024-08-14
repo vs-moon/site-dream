@@ -1,42 +1,37 @@
 <script setup>
-  import { useConst, useEmits, useProps, useRunning } from './index.js'
-  import { useAttrs } from 'vue'
+import { useOptions, useRunning } from './index.js'
+import { useAttrs } from 'vue'
+import { UpCol, UpRow } from '@vs-common/component-up'
+import { CustomizeUpDesignAlive, CustomizeUpDesignMenu, CustomizeUpDesignMore } from '../index.js'
 
-  import { UpAlive, UpMenu, UpCol, UpMore, UpRow } from '@vs-common/component-up/components/index.js'
+const name = 'CustomizeUpDesignNav'
 
-  const name = 'UpNav'
+defineOptions({
+  name
+})
 
-  defineOptions({
-    name,
-    inheritAttrs: false
-  })
+const attrs = useAttrs()
+const slots = defineSlots()
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 
-  const attrs = useAttrs()
-  const slots = defineSlots()
-  const emits = defineEmits([ ...useEmits ])
-  const props = defineProps({ ...useProps })
+const {} = useRunning({ attrs, slots, emits, props, name })
 
-  const {  } = useRunning({ attrs, slots, emits, props, name })
-
-  defineExpose({})
+defineExpose({})
 </script>
 
 <template>
-  <UpRow class="up-nav">
+  <UpRow class="customize-up-design-nav">
     <UpCol icon="Guide" open>
-      <UpAlive />
+      <CustomizeUpDesignAlive />
     </UpCol>
     <UpCol icon="Menu">
-      <UpMenu mode="horizontal" />
+      <CustomizeUpDesignMenu mode="horizontal" />
     </UpCol>
     <UpCol icon="Suitcase">
-      <UpMore />
+      <CustomizeUpDesignMore />
     </UpCol>
   </UpRow>
 </template>
 
-<style lang="scss" scoped>
-  .up-alive {
-    height: inherit;
-  }
-</style>
+<style lang="scss" scoped />

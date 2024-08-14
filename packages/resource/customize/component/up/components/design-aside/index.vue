@@ -2,11 +2,10 @@
 import { useOptions, useRunning } from './index.js'
 import { useAttrs } from 'vue'
 
-const name = 'CustomizeUpAside'
+const name = 'CustomizeUpDesignAside'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
@@ -22,17 +21,17 @@ defineExpose({})
 </script>
 
 <template>
-  <ElAside class="up-aside">
-    <ElRow class="up-aside__header">
+  <ElAside class="customize-up-design-aside">
+    <ElRow class="customize-up-design-aside__header">
       <slot name="header">
-        <ElCol v-show="!status.collapse" class="up-aside__header-sign" :span="6">
+        <ElCol v-show="!status.collapse" class="customize-up-design-aside__header-sign" :span="6">
           <img :src="favicon" alt="favicon" />
         </ElCol>
-        <ElCol v-show="!status.collapse" class="up-aside__header-name" :span="14">
+        <ElCol v-show="!status.collapse" class="customize-up-design-aside__header-name" :span="14">
           <h1>{{ appName }}</h1>
         </ElCol>
-        <ElCol class="up-aside__header-on-off" :span="status.collapse ? 24 : 4">
-          <ElIcon size="24" @click="status.collapse = !status.collapse">
+        <ElCol class="customize-up-design-aside__header-on-off" :span="status.collapse ? 24 : 4">
+          <ElIcon size="24" @click="() => status.collapse = !status.collapse">
             <component is="Expand" v-if="status.collapse" />
             <component is="Fold" v-else />
           </ElIcon>
@@ -42,7 +41,7 @@ defineExpose({})
     <ElScrollbar>
       <slot />
     </ElScrollbar>
-    <p class="up-aside__footer">
+    <p class="customize-up-design-aside__footer">
       <slot name="header">
       </slot>
     </p>
@@ -50,10 +49,10 @@ defineExpose({})
 </template>
 
 <style lang="scss">
-.up-aside {
+.customize-up-design-aside {
   height: 100%;
 
-  .up-aside__header {
+  &__header {
     height: 60px;
     background: #1d1e1f;
     border-radius: 5px;
@@ -64,18 +63,18 @@ defineExpose({})
       justify-content: center;
     }
 
-    .up-aside__header-sign {
+    &-sign {
       img {
         width: 33px;
         height: 33px;
       }
     }
 
-    .up-aside__header-name {
+    &-name {
       justify-content: left;
     }
 
-    .up-aside__header-on-off {
+    &-on-off {
       font-size: large;
     }
   }

@@ -1,161 +1,170 @@
 <script setup>
-import { useConst, useEmits, useProps, useRunning } from '.'
-import { useAttrs } from 'vue'
+import { useOptions, useRunning } from './index.js'
+import { computed, useAttrs } from 'vue'
+import { useDicStore } from '@vs-customize/plugin'
+import { DIC, OPERATE_WAY, VALID_REVERSE, VALID_TYPE } from '@vs-customize/const'
 
-import { useDicStore } from '@vs-common/utils'
-import { OPERATE_WAY, VALID_REVERSE } from '@vs-common/utils'
-import { DIC } from '../../const/enum.js'
-
-const name = 'UpManagePage'
+const name = 'CustomizeUpPageManage'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
 const slots = defineSlots()
-const emits = defineEmits([ ...useEmits ])
-const props = defineProps({ ...useProps })
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 const condition = defineModel('condition', {
   type: Object
 })
 
 const {
   status,
-  outcome,
+  container,
   pagination,
+  mergeTreeProps,
   onInsert,
+  onAppend,
   onDetails,
   onModify,
   onRemove,
   onValid,
   onQuery,
   onLoad,
-  hasOperate
+  hasOperate,
+  elFormRef
 } = useRunning({ attrs, slots, emits, props, name })
 
 const dicStore = useDicStore()
 
-dicStore.remoteDic(DIC.VALID)
+const dicComputed = computed(() => dicStore.dicCache(DIC.VALID))
 
 defineExpose({})
 </script>
 
 <template>
-  <section class="up-outcome">
-    <!--  查询条件抽屉  -->
-    <ElDrawer v-model="status.drawer" :show-close="false">
-      <template #default>
-        <ElForm v-model:condition="condition" @submit.prevent label-width="auto">
-          <slot name="condition" />
-        </ElForm>
-      </template>
-      <template #footer>
-        <ElButton type="success" @click="onInsert">新增</ElButton>
-        <ElButton type="primary" @click="onQuery(true)">查询</ElButton>
-      </template>
-    </ElDrawer>
-    <!--  表格数据  -->
-    <ElTable v-loading="status.loading.outcome"
-             :data="outcome"
-             :row-key="rowKey"
-             :lazy="lazy"
-             :load="onLoad"
-             :tree-props="treeProps"
-             border>
-      <template #default>
-        <slot />
-        <ElTableColumn
-          align="right"
-          fixed="right"
-          min-width="260px"
-          label="操作">
-          <template #header>
-            <slot name="header" />
-            <ElButton
-              type="primary"
-              size="small"
-              @click="onQuery(true)">
-              查询
-            </ElButton>
-            <ElButton
-              type="primary"
-              size="small"
-              @click="status.drawer = true">
-              条件
-            </ElButton>
-            <ElButton
-              type="success"
-              size="small"
-              @click="onInsert">
-              新增
-            </ElButton>
-          </template>
-          <template #default="{ row, column, $index }">
-            <slot name="header-default" :row="row" :column="column" :$index="$index" />
-            <ElButton
-              v-show="hasOperate(OPERATE_WAY.VIEW)"
-              @click="() => onDetails(row)"
-              type="info"
-              size="small"
-              plain>
-              详情
-            </ElButton>
-            <ElButton
-              v-show="hasOperate(OPERATE_WAY.EDIT)"
-              @click="() => onModify(row)"
-              type="primary"
-              size="small"
-              plain>
-              修改
-            </ElButton>
-            <ElButton
-              v-show="hasOperate(OPERATE_WAY.DELETE)"
-              @click="() => onRemove(row, $index)"
-              :loading="status.loading.remove && status.index.remove === $index"
-              type="danger"
-              size="small"
-              plain>
-              删除
-            </ElButton>
-            <ElButton
-              v-show="hasOperate(OPERATE_WAY.VALID)"
-              @click="() => onValid(row, $index)"
-              :loading="status.loading.valid && status.index.valid === $index"
-              :type="dicStore.dicCache?.[DIC.VALID]?.[VALID_REVERSE[row['valid']]]?.color"
-              size="small"
-              plain>
-              {{ dicStore.dicCache?.[DIC.VALID]?.[row['valid']]?.name }}
-            </ElButton>
-          </template>
-        </ElTableColumn>
-      </template>
-    </ElTable>
-    <!--  分页组件  -->
-    <ElPagination
-      v-model:currentPage="pagination.pageNum"
-      @update:currentPage="() => onQuery()"
-      v-model:pageSize="pagination.pageSize"
-      @update:pageSize="() => onQuery()"
-      :total="pagination.total"
-      layout="slot, prev, pager, next, sizes, ->, jumper"
-      background>
-      <ElRow :gutter="10">
-        <ElCol :span="24">
-          <ElInput :model-value="pagination.total" readonly size="default">
-            <template #prepend>
-              <ElButton icon="Coin" />
+  <section class="customize-up-page-manage">
+    <div class="">
+      <!--  表格数据  -->
+      <ElTable
+        v-loading="status.loading.container"
+        :data="container"
+        :row-key="rowKey"
+        :lazy="lazy"
+        :load="onLoad"
+        :tree-props="mergeTreeProps"
+        border>
+        <template #default>
+          <slot />
+          <ElTableColumn
+            align="right"
+            fixed="right"
+            min-width="350px"
+            label="操作">
+            <template #header>
+              <slot name="header" />
+              <ElButton
+                type="primary"
+                size="small"
+                @click="onQuery(true)">
+                查询
+              </ElButton>
+              <ElButton
+                type="primary"
+                size="small"
+                @click="status.drawer = true">
+                条件
+              </ElButton>
+              <ElButton
+                type="success"
+                size="small"
+                @click="onInsert">
+                新增
+              </ElButton>
             </template>
-          </ElInput>
-        </ElCol>
-      </ElRow>
-    </ElPagination>
+            <template #default="{ row, column, $index }">
+              <slot name="header-default" :row="row" :column="column" :$index="$index" />
+              <ElButton
+                :disabled="validConfine && addConfine({ row, column, $index })"
+                v-show="hasOperate(OPERATE_WAY.Add) && lazy"
+                @click="onAppend(row)"
+                type="success"
+                size="small"
+                plain>
+                追加
+              </ElButton>
+              <ElButton
+                :disabled="validConfine && viewConfine({ row, column, $index })"
+                v-show="hasOperate(OPERATE_WAY.VIEW)"
+                @click="onDetails(row)"
+                type="info"
+                size="small"
+                plain>
+                详情
+              </ElButton>
+              <ElButton
+                :disabled="modifyConfine && modifyConfine({ row, column, $index })"
+                v-show="hasOperate(OPERATE_WAY.EDIT)"
+                @click="onModify(row)"
+                type="primary"
+                size="small"
+                plain>
+                修改
+              </ElButton>
+              <ElButton
+                :disabled="deleteConfine && deleteConfine({ row, column, $index })"
+                v-show="hasOperate(OPERATE_WAY.DELETE)"
+                @click="onRemove(row, $index)"
+                :loading="status.loading.remove && status.index.remove === $index"
+                type="danger"
+                size="small"
+                plain>
+                删除
+              </ElButton>
+              <ElButton
+                :disabled="validConfine && validConfine({ row, column, $index })"
+                v-show="hasOperate(OPERATE_WAY.VALID)"
+                @click="onValid(row, $index)"
+                :loading="status.loading.valid && status.index.valid === $index"
+                :type="VALID_TYPE[VALID_REVERSE[row['valid']]]"
+                size="small"
+                plain>
+                {{ dicComputed?.[row['valid']]?.name }}
+              </ElButton>
+            </template>
+          </ElTableColumn>
+        </template>
+      </ElTable>
+      <!--  分页组件  -->
+      <ElPagination
+        v-model:currentPage="pagination.pageNum"
+        @update:currentPage="() => onQuery()"
+        v-model:pageSize="pagination.pageSize"
+        @update:pageSize="() => onQuery()"
+        :total="pagination.total"
+        layout="slot, prev, pager, next, sizes, ->, jumper"
+        background>
+        <ElRow :gutter="10">
+          <ElCol :span="24">
+            <ElInput :model-value="pagination.total" readonly size="default">
+              <template #prepend>
+                <ElButton icon="Coin" />
+              </template>
+            </ElInput>
+          </ElCol>
+        </ElRow>
+      </ElPagination>
+    </div>
+    <div>
+      <ElForm ref="elFormRef" :model="condition" @submit.prevent label-width="auto">
+        <slot name="condition" />
+      </ElForm>
+    </div>
   </section>
 </template>
 
 <style lang="scss" scoped>
-.up-outcome {
+.customize-up-page-manage {
   width: 100%;
   height: 100%;
 

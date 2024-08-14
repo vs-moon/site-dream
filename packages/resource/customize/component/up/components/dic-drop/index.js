@@ -1,19 +1,26 @@
-export const useConst = {
-  key: Symbol('UP_DIC_DROP'),
-  enum: {}
-}
+const eventChange = 'change'
 
-export const useEmits = [
-  'change'
-]
-
-export const useProps = {
-  type: {
-    type: String,
-    default: ''
+export const useOptions = {
+  key: Symbol('CUSTOMIZE_UP_DIC_DROP'),
+  confine: {},
+  emits: [
+    eventChange
+  ],
+  props: {
+    type: {
+      type: String,
+      default: ''
+    }
   }
 }
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
-  return {}
+  
+  const onChange = v => {
+    emits(eventChange, v)
+  }
+  
+  return {
+    onChange
+  }
 }

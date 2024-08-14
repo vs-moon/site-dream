@@ -1,0 +1,13 @@
+{
+  "name": "@vs-customize/api-resource",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "定制化接口-资源服务",
+  "author": "xiao",
+  "dependencies": {
+    "@vs-common/utils": "workspace:*",
+    "@vs-customize/fetch": "workspace:*"
+  }
+}

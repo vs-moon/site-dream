@@ -1,4 +1,4 @@
-import { JS_TYPE } from '../const/index.js'
+import { JS_TYPE } from '@vs-common/const'
 import { JsType, isArray, isObject, isTruly, isFunction } from '../type/index.js'
 import { isEmpty as isEmptyArray } from '../array/index.js'
 import { isEmpty as isEmptyObject } from '../object/index.js'
@@ -72,7 +72,7 @@ export const chunking = (source, { size = 3, filter }) => {
  */
 export const toBranch = (array = [], options = {
   primaryKey: 'id',
-  parentKey: 'parentId',
+  parentKey: 'pid',
   children: 'children'
 }) => {
   if (isArray(array)) {
@@ -169,8 +169,9 @@ export const atomArrayUnique = (array, prop, roster = new Map()) => {
  * @returns
  * @param o
  * @param recurrence
+ * @param isBlank
  */
-export const removeEmptyProp = (o, recurrence = true) => {
+export const removeEmptyProp = (o, { recurrence = true, isBlank = false } = { recurrence: true, isBlank: false }) => {
   if (o) {
     Reflect.ownKeys(o).forEach(property => {
       const v = o[property]
@@ -181,21 +182,16 @@ export const removeEmptyProp = (o, recurrence = true) => {
           Reflect.deleteProperty(o, property)
           break
         case JS_TYPE.String:
-          isEmptyString(v) && Reflect.deleteProperty(o, property)
-          break
-        case JS_TYPE.Object:
-          if (isEmptyObject(v)) {
-            Reflect.deleteProperty(o, property)
-          } else {
-            recurrence && removeEmptyProp(v)
-          }
+          isBlank ?
+            v.trim() === '' && Reflect.deleteProperty(o, property) : v === '' && Reflect.deleteProperty(o, property)
           break
         case JS_TYPE.Array:
-          if (isEmptyArray(v)) {
-            Reflect.deleteProperty(o, property)
-          } else {
-            recurrence && v.forEach(item => removeEmptyProp(item))
-          }
+          v.length === 0 ?
+            Reflect.deleteProperty(o, property) : recurrence && v.forEach(item => removeEmptyProp(item))
+          break
+        case JS_TYPE.Object:
+          Reflect.ownKeys(v).length === 0 ?
+            Reflect.deleteProperty(o, property) : recurrence && removeEmptyProp(v)
           break
         default:
           break

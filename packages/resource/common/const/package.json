@@ -1,0 +1,9 @@
+{
+  "name": "@vs-common/const",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "通用常量",
+  "author": "xiao"
+}

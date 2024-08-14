@@ -1,0 +1,38 @@
+@mixin vs-mixin-after {
+  &:after {
+    content: '';
+    width: inherit;
+    height: inherit;
+  }
+}
+
+@mixin vs-mixin-xy-c {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin vs-mixin-xy-l {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+@mixin vs-mixin-xy-r {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+@mixin vs-mixin-x_b-y_c {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@mixin vs-mixin-column {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+}

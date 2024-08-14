@@ -1,24 +1,23 @@
 <script setup>
-  import { useEmits, useProps, useRunning } from '.'
-  import { useAttrs } from 'vue'
+import { useOptions, useRunning } from './index.js'
+import { useAttrs } from 'vue'
 
-  const name = 'UpLink'
+const name = 'UpLink'
 
-  defineOptions({
-    name,
-    inheritAttrs: false
-  })
+defineOptions({
+  name
+})
 
-  const attrs = useAttrs()
-  const slots = defineSlots()
-  const emits = defineEmits([ ...useEmits ])
-  const props = defineProps({ ...useProps })
+const attrs = useAttrs()
+const slots = defineSlots()
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 
-  const {
-    isExternalLink
-  } = useRunning({ attrs, slots, emits, props, name })
+const {
+  isExternalLink
+} = useRunning({ attrs, slots, emits, props, name })
 
-  defineExpose({})
+defineExpose({})
 </script>
 
 <template>
@@ -42,5 +41,4 @@
   </section>
 </template>
 
-<style lang="scss">
-</style>
+<style lang="scss" scoped />

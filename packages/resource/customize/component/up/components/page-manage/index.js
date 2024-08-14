@@ -1,105 +1,130 @@
-import { reactive, ref, watch } from 'vue'
+import { onActivated, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
+import { useEffectScope } from '@vs-common/hook'
+import { ObjectUtils } from '@vs-common/utils'
+import { useRouteStore, getRouteJumpProperty } from '@vs-customize/plugin'
+import { VIEW_MODE, VALID_REVERSE, OPERATE_WAY } from '@vs-customize/const'
 
-import { VIEW_MODE, VALID_REVERSE, OPERATE_WAY, useMenuStore, getRouteJumpProperty } from '@vs-common/utils'
-import { useScope } from '@vs-common/hook'
+const eventRemoteQuery = 'remote:query'
+const eventRemoteRemove = 'remote:remove'
+const eventRemoteValid = 'remote:valid'
+const eventRemoteLazy = 'remote:lazy'
 
-export const useConst = {
-  key: Symbol('UP_MANAGE_PAGE'),
-  enum: {}
+const defaultTreeProps = {
+  children: 'children',
+  hasChildren: 'hasChildren'
 }
 
-export const useEmits = [
-  'remote:query',
-  'remote:remove',
-  'remote:valid',
-  'remote:lazy'
-]
-
-export const useProps = {
-  remoteQuery: {
-    type: Function,
-    default: null
-  },
-  remoteRemove: {
-    type: Function,
-    default: null
-  },
-  remoteValid: {
-    type: Function,
-    default: null
-  },
-  remoteLazy: {
-    type: Function,
-    default: null
-  },
-  operates: {
-    type: Array,
-    default: Reflect.ownKeys(OPERATE_WAY)
-  },
-  editable: {
-    type: Boolean,
-    default: true
-  },
-  property: {
-    type: Object,
-    default: {
-      primary: 'id',
-      valid: 'valid'
+export const useOptions = {
+  key: Symbol('CUSTOMIZE_UP_PAGE_MANAGE'),
+  confine: {},
+  emits: [
+    eventRemoteQuery,
+    eventRemoteRemove,
+    eventRemoteValid,
+    eventRemoteLazy
+  ],
+  props: {
+    remoteQuery: {
+      type: Function,
+      default: null
+    },
+    remoteRemove: {
+      type: Function,
+      default: null
+    },
+    remoteValid: {
+      type: Function,
+      default: null
+    },
+    remoteLazy: {
+      type: Function,
+      default: null
+    },
+    viewConfine: {
+      type: Function,
+      default: null
+    },
+    addConfine: {
+      type: Function,
+      default: null
+    },
+    modifyConfine: {
+      type: Function,
+      default: null
+    },
+    deleteConfine: {
+      type: Function,
+      default: null
+    },
+    validConfine: {
+      type: Function,
+      default: null
+    },
+    operates: {
+      type: Array,
+      default: Object.values(OPERATE_WAY)
+    },
+    editable: {
+      type: Boolean,
+      default: true
+    },
+    confineProps: {
+      type: Object,
+      default: null
+    },
+    confineAttribute: {
+      type: [ String, Array ],
+      default: null
+    },
+    rowKey: {
+      type: String,
+      default: 'id'
+    },
+    parentKey: {
+      type: String,
+      default: 'pid'
+    },
+    validKey: {
+      type: String,
+      default: 'valid'
+    },
+    lazy: {
+      type: Boolean,
+      default: false
+    },
+    load: {
+      type: Function,
+      default: null
+    },
+    treeProps: {
+      type: Object,
+      default: () => (defaultTreeProps)
     }
-  },
-  rowKey: {
-    type: String,
-    default: 'id'
-  },
-  lazy: {
-    type: Boolean,
-    default: false
-  },
-  load: {
-    type: Function,
-    default: null
-  },
-  treeProps: {
-    children: 'children',
-    hasChildren: 'hasChildren'
   }
 }
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
   
-  const { nextRoute } = useMenuStore()
+  const { nextRoute } = useRouteStore()
   
   const router = useRouter()
   
-  const outcome = ref([])
+  const container = ref([])
   
   const status = reactive({
+    collapse: '0',
     drawer: false,
     loading: {
       valid: false,
       remove: false,
-      outcome: false
+      container: false
     },
     index: {
       valid: -1,
       remove: -1
     }
-  })
-  
-  useScope(() => {
-    watch(() => status.loading.valid, v => {
-      if (!v) {
-        status.index.valid = -1
-      }
-    })
-    
-    watch(() => status.loading.remove, v => {
-      if (!v) {
-        status.index.remove = -1
-      }
-    })
   })
   
   const pagination = reactive({
@@ -108,46 +133,66 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     total: 0
   })
   
-  const onJump = async (viewMode, id = null) => {
-    await router.push({ ...getRouteJumpProperty(nextRoute(), { id, viewMode }) })
+  const mergeTreeProps = { ...defaultTreeProps, ...props.treeProps }
+  
+  const elFormRef = ref(null)
+  
+  const onJump = async (vm, id = null, args) => {
+    await router.push({ ...getRouteJumpProperty(nextRoute(), { id, vm, ...args}) })
+  }
+  
+  const onAppend = async row => {
+    const confineMapping = ObjectUtils.valueTaking(row, props.confineAttribute)
+    const args = props.lazy ? { ...confineMapping, [props.parentKey]: row[props.rowKey] } : confineMapping
+    await onJump(VIEW_MODE.ADD, null, args)
   }
   
   const onInsert = async () => {
-    await onJump(VIEW_MODE.ADD, null)
+    if (props.confineProps) {
+      const valid = await elFormRef.value.validate()
+      if (!valid) {
+        status.drawer = true
+        return false
+      }
+    }
+    const args = props.lazy ? { [props.parentKey]: '0', ...props.confineProps } : { ...props.confineProps }
+    await onJump(VIEW_MODE.ADD, null, args)
   }
   
   const onDetails = async row => {
-    await onJump(VIEW_MODE.VIEW, row[props.property.primary])
+    await onJump(VIEW_MODE.VIEW, row[props.rowKey])
   }
   
   const onModify = async row => {
-    await onJump(VIEW_MODE.MODIFY, row[props.property.primary])
+    await onJump(VIEW_MODE.MODIFY, row[props.rowKey])
   }
   
   const onRemove = async (row, index) => {
     ElMessageBox.confirm('确认删除吗')
       .then(() => {
-        const { isFetching, then } = props.remoteRemove(row[props.property.primary])
+        const { isFetching, then, notification } = props.remoteRemove(row[props.rowKey])
         status.loading.remove = isFetching
         status.index.remove = index
         then(response => {
           if (response.success) {
-            
-            emits('remote:remove')
+            notification()
+            emits(eventRemoteRemove)
+            onQuery()
           }
         })
       })
   }
   
   const onValid = async (row, index) => {
-    const reverse = VALID_REVERSE[row[props.property.valid]]
-    const { isFetching, then } = props.remoteValid({ by: row[props.property.primary], to: reverse })
+    const reverse = VALID_REVERSE[row[props.validKey]]
+    const { isFetching, then, notification } = props.remoteValid({ by: row[props.rowKey], to: reverse })
     status.loading.valid = isFetching
     status.index.valid = index
     then(response => {
       if (response.success) {
-        row[props.property.valid] = reverse
-        emits('remote:valid')
+        notification()
+        row[props.validKey] = reverse
+        emits(eventRemoteValid)
       }
     })
   }
@@ -163,12 +208,14 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize
     })
-    status.loading.outcome = isFetching
+    
+    status.loading.container = isFetching
+    
     then(response => {
       if (response.success) {
-        outcome.value = response.data.list
+        container.value = response.data.list
         pagination.total = response.data.total
-        emits('remote:query', outcome.value)
+        emits(eventRemoteQuery, container.value)
       }
     })
   }
@@ -177,7 +224,7 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     const { then } = props.remoteLazy({ [props.rowKey]: row[props.rowKey] })
     then(response => {
       resolve(response.data)
-      emits('remote:lazy', response.data)
+      emits(eventRemoteLazy, response.data)
     })
   }
   
@@ -185,19 +232,40 @@ export const useRunning = ({ attrs, slots, emits, props, name }) => {
     return props.operates.includes(operateWay) && props.editable
   }
   
-  onQuery(true)
+  
+  useEffectScope(() => {
+    watch(() => status.loading.valid, v => {
+      if (!v) {
+        status.index.valid = -1
+      }
+    })
+    
+    watch(() => status.loading.remove, v => {
+      if (!v) {
+        status.index.remove = -1
+      }
+    })
+  })
+  
+  
+  onActivated(() => {
+    onQuery(true)
+  })
   
   return {
     status,
-    outcome,
+    container,
     pagination,
+    mergeTreeProps,
     onQuery,
+    onAppend,
     onInsert,
     onDetails,
     onModify,
     onRemove,
     onValid,
     onLoad,
-    hasOperate
+    hasOperate,
+    elFormRef
   }
 }

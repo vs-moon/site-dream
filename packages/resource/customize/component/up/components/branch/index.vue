@@ -1,22 +1,19 @@
 <script setup>
-import { vsConst, vsEmits, vsProps, useRunning } from '.'
+import { useOptions, useRunning } from './index.js'
 import { useAttrs } from 'vue'
+import { DIC } from '@vs-customize/const'
+import { CustomizeUpDicDrop } from '../index.js'
 
-import { DIC } from '../../const/enum.js'
-
-import { UpDicDrop } from '../index.js'
-
-const name = 'UpBranch'
+const name = 'CustomizeUpBranch'
 
 defineOptions({
-  name,
-  inheritAttrs: false
+  name
 })
 
 const attrs = useAttrs()
 const slots = defineSlots()
-const emits = defineEmits(vsEmits)
-const props = defineProps({ ...vsProps })
+const emits = defineEmits([ ...useOptions.emits ])
+const props = defineProps({ ...useOptions.props })
 
 const {
   condition,
@@ -48,7 +45,7 @@ const {
   expose
 } = useRunning({ attrs, slots, emits, props, name })
 
-const { FLAG } = vsConst.enum
+const { FLAG } = useOptions.confine
 
 defineExpose({
   onRefresh,
@@ -95,7 +92,7 @@ defineExpose({
                 <component is="Promotion" />
               </ElIcon>
             </ElButton>
-            <UpDicDrop v-model="condition.source" :type="DIC.SOURCE" @change="onRefresh" />
+            <CustomizeUpDicDrop v-model="condition.app" :type="DIC.APP" @change="onRefresh" />
           </template>
           <template #append>
             <ElButton link type="primary" @click.stop="onRefresh">
@@ -135,13 +132,11 @@ defineExpose({
           </span>
           <span v-if="editable">
             <template v-if="node.key === FLAG.NEW">
-              <ElTooltip content="移除">
-                <ElButton link type="danger" @click.stop="() => onReduce(node)">
+              <ElButton link type="danger" @click.stop="() => onReduce(node)">
                   <ElIcon color="teal" size="20">
                     <component is="Remove" />
                   </ElIcon>
                 </ElButton>
-              </ElTooltip>
             </template>
             <template v-else>
               <ElSwitch

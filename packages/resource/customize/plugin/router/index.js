@@ -1,8 +1,8 @@
 import { isNavigationFailure, NavigationFailureType } from 'vue-router'
-import { readonly, ref, toRaw, toRefs } from 'vue'
-import { JUMP_MODE, JUMP_MODE_PROPERTY, MENU_MODE, VIEW_MODE_MAP, } from '../../common/const/index.js'
-import { isEmpty } from '../../common/utils/array/index.js'
-import { useAliveStore, useAuthorizationStore, useMenuStore, useProperty } from '../store/index.js'
+import { readonly, ref, toRaw } from 'vue'
+import { ArrayUtils } from '@vs-common/utils'
+import { JUMP_MODE, JUMP_MODE_PROPERTY, NAV_TYPE, VIEW_MODE_MAP, PROPERTY_ROUTE, VALID } from '@vs-customize/const'
+import { useAliveStore, useAuthorizeStore, useRouteStore } from '../store/index.js'
 
 const routeInstance = ref({
   addRoute: () => {},
@@ -25,8 +25,7 @@ const _routeComponentsModules = import.meta.glob('@/views/**/*.vue')
  * @returns {{value: *, key: *}}
  */
 export const getJumpModeMapping = args => {
-  const aliveProperty = useProperty().aliveStore
-  const key = JUMP_MODE_PROPERTY[args[aliveProperty.jumpMode]]
+  const key = JUMP_MODE_PROPERTY[args[PROPERTY_ROUTE.mode]]
   const value = args[key]
   return {
     key,
@@ -36,11 +35,11 @@ export const getJumpModeMapping = args => {
 
 /**
  * 是否可跳转
- * @param menuMode
+ * @param type
  * @returns {boolean}
  */
-export const isCanJump = menuMode => {
-  return menuMode === MENU_MODE.D || menuMode === MENU_MODE.M
+export const isCanJump = type => {
+  return type === NAV_TYPE.V
 }
 
 /**
@@ -60,17 +59,16 @@ const renameRouteComponent = (name, module) => {
 
 /**
  * 更新路由跳转
- * @param menuItem
+ * @param routeItem
  * @param to
  * @returns {(*&{state: {props}})|(*&{query: undefined})}
  */
-export const updateRouteJumpProperty = (menuItem, to) => {
-  const aliveProperty = useProperty().aliveStore
+export const updateRouteJumpProperty = (routeItem, to) => {
   const { query } = to
-  if (menuItem[aliveProperty.jumpMode] === JUMP_MODE.P) {
-    return menuItem.routeJump.query = query
+  if (routeItem[PROPERTY_ROUTE.mode] === JUMP_MODE.P) {
+    return routeItem.routeJump.query = query
   } else {
-    return menuItem.routeJump.state = {
+    return routeItem.routeJump.state = {
       props: history.state.props
     }
   }
@@ -78,14 +76,13 @@ export const updateRouteJumpProperty = (menuItem, to) => {
 
 /**
  * 获取路由跳转
- * @param menuItem
+ * @param routeItem
  * @param args
  * @returns {{name: *, state: {props}}|{path: *, query}}
  */
-export const getRouteJumpProperty = (menuItem, args = {}) => {
-  const aliveProperty = useProperty().aliveStore
-  const { value } = getJumpModeMapping(menuItem)
-  if (menuItem[aliveProperty.jumpMode] === JUMP_MODE.P) {
+export const getRouteJumpProperty = (routeItem, args = {}) => {
+  const { value } = getJumpModeMapping(routeItem)
+  if (routeItem[PROPERTY_ROUTE.mode] === JUMP_MODE.P) {
     return {
       path: value,
       query: args
@@ -102,12 +99,12 @@ export const getRouteJumpProperty = (menuItem, args = {}) => {
 
 /**
  * 获取路由跳转
- * @param menuItem
+ * @param routeItem
  * @param args
  * @returns {{name: *, state: {props}}|{path: *, query}}
  */
-export const setRouteJumpProperty = (menuItem, args = {}) => {
-  menuItem.routeJump = getRouteJumpProperty(menuItem, args)
+export const setRouteJumpProperty = (routeItem, args = {}) => {
+  routeItem.routeJump = getRouteJumpProperty(routeItem, args)
 }
 
 /**
@@ -126,91 +123,84 @@ export const getRouteParam = (route, jumpMode) => {
 
 /**
  * 生成路由项
- * @param menuItem
+ * @param routeItem
  * @param modules
  * @param routers
  * @param children
  */
-const generateRouteItem = (menuItem, modules, routers, children) => {
-  const aliveProperty = useProperty().aliveStore
+const generateRouteItem = (routeItem, modules, routers, children) => {
   const {
-    [aliveProperty.modulePath]: modulePath,
-    [aliveProperty.routePath]: routePath,
-    [aliveProperty.routeName]: routeName,
-    [aliveProperty.jumpMode]: jumpMode,
-    [aliveProperty.menuName]: menuName,
-    [aliveProperty.menuMode]: menuMode
-  } = menuItem
+    [PROPERTY_ROUTE.uri]: uri,
+    [PROPERTY_ROUTE.path]: path,
+    [PROPERTY_ROUTE.name]: name,
+    [PROPERTY_ROUTE.mode]: mode,
+    [PROPERTY_ROUTE.title]: title,
+  } = routeItem
   
-  setRouteJumpProperty(menuItem)
+  setRouteJumpProperty(routeItem)
   
   routers.push({
-    path: routePath,
-    name: routeName,
-    props: route => getRouteParam(route, jumpMode),
-    component: renameRouteComponent(routeName, modules[modulePath]),
+    path,
+    name,
+    props: route => getRouteParam(route, mode),
+    component: renameRouteComponent(name, modules[uri]),
     children,
     meta: {
       lang: [ 'zh-cn' ],
-      title: menuName,
-      mode: {
-        jump: jumpMode,
-        menu: menuMode
-      }
+      title,
+      mode
     }
   })
 }
 
 /**
  * 生成路由集
- * @param {*[]} menus
+ * @param {*[]} routes
  * @param {*} modules
  * @returns
  */
-export const generateRoute = (menus, modules) => {
+export const generateRoute = (routes, modules) => {
   
-  const aliveProperty = useProperty().aliveStore
   const routers = []
   
-  menus.forEach(menuItem => {
+  routes.forEach(routeItem => {
     const {
-      [aliveProperty.modulePath]: modulePath,
-      [aliveProperty.menuMode]: menuMode
-    } = menuItem
+      [PROPERTY_ROUTE.uri]: uri,
+      [PROPERTY_ROUTE.type]: type
+    } = routeItem
     
-    if (isCanJump(menuMode) && modules[modulePath]) {
-      generateRouteItem(menuItem, modules, routers, null)
+    if (isCanJump(type) && modules[uri]) {
+      generateRouteItem(routeItem, modules, routers, null)
     }
   })
   
   return routers
 }
 
-export const generateRouteNesting = (menus, modules) => {
+export const generateRouteNesting = (routes, modules) => {
   
-  const aliveProperty = useProperty().aliveStore
   
   const routers = []
   
-  menus.forEach(menuItem => {
+  routes.forEach(routeItem => {
     const {
-      [aliveProperty.modulePath]: modulePath,
-      [aliveProperty.menuMode]: menuMode,
-      [aliveProperty.children]: children
-    } = menuItem
+      [PROPERTY_ROUTE.uri]: uri,
+      [PROPERTY_ROUTE.type]: type,
+      [PROPERTY_ROUTE.children]: children
+    } = routeItem
     
-    if (!isEmpty(children)) {
+    if (!ArrayUtils.isEmpty(children)) {
       const childrenRoute = generateRoute(children, modules)
-      if (isCanJump(menuMode) && modules[modulePath]) {
-        generateRouteItem(menuItem, modules, routers, childrenRoute)
+      if (isCanJump(type) && modules[uri]) {
+        generateRouteItem(routeItem, modules, routers, childrenRoute)
       } else {
-        if (!isEmpty(childrenRoute)) {
+        if (!ArrayUtils.isEmpty(childrenRoute)) {
           routers.push(...childrenRoute)
         }
       }
     } else {
-      if (isCanJump(menuMode) && modules[modulePath]) {
-        generateRouteItem(menuItem, modules, routers, null)
+      if (isCanJump(type) && modules[uri]) {
+        generateRouteItem(routeItem, modules, routers, null)
       }
     }
   })
@@ -232,9 +222,9 @@ export const addRoute = (parentName, routes) => {
 
 const getViewModeName = routeArgs => {
   if (routeArgs) {
-    const { viewMode } = routeArgs
-    if (viewMode) {
-      return VIEW_MODE_MAP[viewMode]
+    const { vm } = routeArgs
+    if (vm) {
+      return VIEW_MODE_MAP[vm]
     }
   }
   
@@ -244,14 +234,12 @@ const getViewModeName = routeArgs => {
 export default {
   install (app, { router, routeModules, routeConst = {}, titlePrefix = 'Route' }) {
     
-    const aliveProperty = useProperty().aliveStore
-    
     const aliveStore = useAliveStore()
-    const authorizationStore = useAuthorizationStore()
-    const menuStore = useMenuStore()
+    const authorizeStore = useAuthorizeStore()
+    const routeStore = useRouteStore()
     
     const finalRouteConst = {
-      ...ROUTE_CONST,
+      ...ROUTE,
       ...routeConst
     }
     
@@ -259,7 +247,7 @@ export default {
       // TODO [存在访问中页面](重定向至访问中页面)
       if (aliveStore.active) {
         return {
-          ...toRaw(aliveStore.current[aliveProperty.routeJump])
+          ...toRaw(aliveStore.current[PROPERTY_ROUTE.routeJump])
         }
       }
       
@@ -271,17 +259,20 @@ export default {
       // TODO [如果跳转目标为登录页面]
       if (to.path === finalRouteConst.entrance.path) {
         // TODO [如果已认证](拦截登录页面跳转, 重定向至访问中页面或根页面, 只有登出成功后才可访问)
-        if (authorizationStore.enable) {
+        if (authorizeStore.enable) {
           return defaultRouteJump(finalRouteConst.root.path)
         }
       } else {
         // TODO [如果已认证]
-        if (authorizationStore.enable) {
+        if (authorizeStore.enable) {
           // TODO 如果跳转目标为根页面
           if (to.path === finalRouteConst.root.path) {
-            return defaultRouteJump()
+            // TODO 如果存在默认展示页
+            const homeRoute = routeStore.source.find(item => item[PROPERTY_ROUTE.home] === VALID.T)
+            // TODO 防止无法离开默认展示页
+            return defaultRouteJump(homeRoute?.[PROPERTY_ROUTE.path] === from.path ? undefined : homeRoute?.[PROPERTY_ROUTE.routeJump])
           } else {
-            const canJumpRoute = menuStore.source.find(item => item[aliveProperty.routePath] === to.path)
+            const canJumpRoute = routeStore.source.find(item => item[PROPERTY_ROUTE.path] === to.path)
             // TODO [不存在可跳转页面]
             if (!canJumpRoute) {
               return defaultRouteJump(finalRouteConst.root.path)
@@ -322,17 +313,15 @@ export default {
       } else {
         
         const { mode } = to.meta
-        let viewModeName = ''
+        let vmName = ''
         
         if (mode) {
-          if (mode.menu === MENU_MODE.D) {
-            viewModeName = ' | ' + getViewModeName(mode.jump === JUMP_MODE.N ? router.options.history.state.props : to.query)
-          }
+          vmName = ' | ' + getViewModeName(mode === JUMP_MODE.N ? router.options.history.state.props : to.query)
         }
         
-        document.title = to.meta.title ? `${titlePrefix} | ${ to.meta.title }${ viewModeName }` : titlePrefix
+        document.title = to.meta.title ? `${titlePrefix} | ${ to.meta.title }${ vmName }` : titlePrefix
         
-        let canJumpRoute = menuStore.source.find(item => item[aliveProperty.routePath] === to.path)
+        let canJumpRoute = routeStore.source.find(item => item[PROPERTY_ROUTE.path] === to.path)
         
         if (canJumpRoute) {
           updateRouteJumpProperty(canJumpRoute, to)
@@ -350,8 +339,8 @@ export default {
     
     const onMount = () => {
       routeInstance.value = router
-      if (menuStore.enable) {
-        addRoute(finalRouteConst.root.name, generateRoute(menuStore.source, routeModules || _routeComponentsModules))
+      if (routeStore.enable) {
+        addRoute(finalRouteConst.root.name, generateRoute(routeStore.source, routeModules || _routeComponentsModules))
       }
       
       app.use(router)
@@ -379,7 +368,7 @@ export default {
   }
 }
 
-export const ROUTE_CONST = {
+export const ROUTE = {
   entrance: {
     path: '/login',
     name: 'login'

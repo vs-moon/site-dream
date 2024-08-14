@@ -1,4 +1,4 @@
-import { isAsyncFunction, restArgsAppend } from '@vs-common/utils'
+import { TypeUtils, PackageUtils } from '@vs-common/utils'
 
 /**
  * 鼠标长按
@@ -7,7 +7,7 @@ import { isAsyncFunction, restArgsAppend } from '@vs-common/utils'
  * @param exeMouseUp          触发长按回调后, 是否在触发鼠标松开时再次调用回调函数
  * @param runningDuration     动画帧长按调用时长 (ms)
  * @param maxRunningDuration  动画帧长按最大调用时长 (ms)
- * @returns {{onMouseUp: onMouseUp, onMouseDown: onMouseDown}}
+ * @returns {{onMouseUp, onMouseDown}}
  */
 export const useMouseLongPress = (callBack, {
   delay = 500,
@@ -57,7 +57,7 @@ export const useMouseLongPress = (callBack, {
   const onMouseDown = (...args) => {
     
     // Rest参数追加处理
-    const restArgsCopy = restArgsAppend(args, { done, type: onMouseDown.name })
+    const restArgsCopy = PackageUtils.restArgsAppend(args, { done, type: onMouseDown.name })
     
     // 记录按下时间
     pressDownTime = Date.now()
@@ -92,7 +92,7 @@ export const useMouseLongPress = (callBack, {
         // 如果未设置动画帧长按调用时长 || 长按结束时长大于等于当前时间戳
         if ((longPressEndTime === longPressStartTime || longPressEndTime >= timestamp)) {
           // 执行回调函数
-          isAsyncFunction(callBack) ? await callBack(...restArgsCopy) : callBack(...restArgsCopy)
+          TypeUtils.isAsyncFunction(callBack) ? await callBack(...restArgsCopy) : callBack(...restArgsCopy)
           // callBack 内未执行传递的 done 函数, 继续调用 animationFrameStep
           if (!isDone) {
             framer = requestAnimationFrame(animationFrameStep)
@@ -122,7 +122,7 @@ export const useMouseLongPress = (callBack, {
       console.error(`函数调用终止: onMouseUp, 原因: onMouseDown 或 callBack 因为异常逻辑, 已自行提前终止动画帧任务`)
     } else {
       // Rest参数追加处理
-      const restArgsCopy = restArgsAppend(args, { type: onMouseUp.name })
+      const restArgsCopy = PackageUtils.restArgsAppend(args, { type: onMouseUp.name })
       // 长按时长
       const longPressDuration = Date.now() - pressDownTime
       // 重置按下时间

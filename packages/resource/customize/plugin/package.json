@@ -1,0 +1,14 @@
+{
+  "name": "@vs-customize/plugin",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "定制化插件",
+  "author": "xiao",
+  "dependencies": {
+    "@vs-common/hook": "workspace:*",
+    "@vs-common/utils": "workspace:*",
+    "@vs-customize/const": "workspace:*"
+  }
+}

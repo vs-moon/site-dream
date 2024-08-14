@@ -12,7 +12,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vs-common/const": "workspace:*",
     "@vs-common/hook": "workspace:*",
-    "@vs-common/utils": "workspace:*"
+    "@vs-common/utils": "workspace:*",
+    "ace-builds": "^1.35.4",
+    "js-beautify": "^1.14.3",
+    "jsmin": "^1.0.1",
+    "vue3-ace-editor": "^2.2.4"
   }
 }

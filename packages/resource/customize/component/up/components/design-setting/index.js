@@ -1,11 +1,9 @@
-export const useConst = {
-  key: Symbol('UP_SETTING'),
-  enum: {}
+export const useOptions = {
+  key: Symbol('CUSTOMIZE_UP_DESIGN_SETTING'),
+  confine: {},
+  emits: [],
+  props: {}
 }
-
-export const useEmits = []
-
-export const useProps = {}
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
 

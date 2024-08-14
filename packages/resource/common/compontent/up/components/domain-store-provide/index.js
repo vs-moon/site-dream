@@ -2,9 +2,9 @@ import { useEventListener } from '@vueuse/core'
 import { RESPONSE_STATUS } from '@vs-common/const'
 import { commonResponseFailBy, commonResponseSuccess } from '@vs-common/utils'
 
-const eventResponse = 'event:response'
+const eventResponse = 'response'
 
-export const useOptions = Object.freeze({
+export const useOptions = {
   key: Symbol('UP_DOMAIN_STORE_PROVIDE'),
   confine: {},
   emits: [
@@ -24,7 +24,7 @@ export const useOptions = Object.freeze({
       default: ''
     }
   }
-})
+}
 
 export const useRunning = ({ attrs, slots, emits, props, name }) => {
   useEventListener(window, 'message', event => {
